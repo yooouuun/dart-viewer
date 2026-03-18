@@ -1,67 +1,64 @@
-const DART_API_BASE = 'https://opendart.fss.or.kr/api';
-
-export default {
-  async fetch(request, env) {
-    const url = new URL(request.url);
-
-    if (!url.pathname.startsWith('/api/')) {
-      return new Response(null, { status: 404 });
-    }
-
-    if (request.method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers: corsHeaders() });
-    }
-
-    const apiPath = url.pathname.replace('/api/', '');
-    if (!apiPath) {
-      return resp({ error: 'No API path' }, 400);
-    }
-
-    const apiKey = env.DART_API_KEY || '';
-    const dartUrl = new URL(DART_API_BASE + '/' + apiPath);
-
-    for (const [k, v] of url.searchParams.entries()) {
-      dartUrl.searchParams.set(k, v);
-    }
-    dartUrl.searchParams.set('crtfc_key', apiKey);
-
-    try {
-      const r = await fetch(dartUrl.toString());
-      const ct = r.headers.get('content-type') || '';
-
-      if (ct.includes('zip') || ct.includes('octet')) {
-        return new Response(await r.arrayBuffer(), {
-          status: r.status,
-          headers: { ...corsHeaders(), 'Content-Type': 'application/zip' },
-        });
-      }
-
-      return new Response(await r.text(), {
-        status: r.status,
-        headers: { ...corsHeaders(), 'Content-Type': ct || 'application/json; charset=utf-8' },
-      });
-    } catch (e) {
-      return resp({ error: e.message }, 500);
-    }
-  },
-};
+const DART_API_BASE = "https://opendart.fss.or.kr/api";
 
 function corsHeaders() {
   return {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type"
   };
 }
 
-function resp(data, status) {
+function jsonResp(data, status) {
   return new Response(JSON.stringify(data), {
-    status,
-    headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
+    status: status,
+    headers: Object.assign({}, corsHeaders(), { "Content-Type": "application/json" })
   });
 }
-```
 
-**Commit changes** 클릭 후 Cloudflare 자동 배포를 기다렸다가, 다시 아래 주소를 테스트해주세요:
-```
-https://dart-viewer.yooouuun.workers.dev/api/fnlttSinglAcnt.json?corp_code=00126380&bsns_year=2024&reprt_code=11011
+export default {
+  async fetch(request, env) {
+    var url = new URL(request.url);
+
+    if (!url.pathname.startsWith("/api/")) {
+      return new Response(null, { status: 404 });
+    }
+
+    if (request.method === "OPTIONS") {
+      return new Response(null, { status: 204, headers: corsHeaders() });
+    }
+
+    var apiPath = url.pathname.replace("/api/", "");
+    if (!apiPath) {
+      return jsonResp({ error: "No API path" }, 400);
+    }
+
+    var apiKey = env.DART_API_KEY || "";
+    var dartUrl = new URL(DART_API_BASE + "/" + apiPath);
+
+    url.searchParams.forEach(function(v, k) {
+      dartUrl.searchParams.set(k, v);
+    });
+    dartUrl.searchParams.set("crtfc_key", apiKey);
+
+    try {
+      var r = await fetch(dartUrl.toString());
+      var ct = r.headers.get("content-type") || "";
+
+      if (ct.indexOf("zip") !== -1 || ct.indexOf("octet") !== -1) {
+        var buf = await r.arrayBuffer();
+        return new Response(buf, {
+          status: r.status,
+          headers: Object.assign({}, corsHeaders(), { "Content-Type": "application/zip" })
+        });
+      }
+
+      var text = await r.text();
+      return new Response(text, {
+        status: r.status,
+        headers: Object.assign({}, corsHeaders(), { "Content-Type": ct || "application/json; charset=utf-8" })
+      });
+    } catch (e) {
+      return jsonResp({ error: e.message }, 500);
+    }
+  }
+};
