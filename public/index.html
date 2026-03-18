@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DART 공시 재무제표 비교 조회</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #0a0e17;
+  --bg-secondary: #111827;
+  --bg-card: #1a2236;
+  --bg-card-hover: #1f2a42;
+  --bg-input: #0f1629;
+  --border: #2a3554;
+  --border-focus: #3b82f6;
+  --text-primary: #e8ecf4;
+  --text-secondary: #8899b4;
+  --text-muted: #5a6b8a;
+  --accent: #3b82f6;
+  --accent-dim: rgba(59, 130, 246, 0.15);
+  --accent-bright: #60a5fa;
+  --green: #10b981;
+  --green-dim: rgba(16, 185, 129, 0.15);
+  --red: #ef4444;
+  --red-dim: rgba(239, 68, 68, 0.15);
+  --yellow: #f59e0b;
+  --yellow-dim: rgba(245, 158, 11, 0.15);
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Header */
+header {
+  padding: 32px 0 24px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(59,130,246,0.06) 0%, transparent 100%);
+}
+header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo-icon {
+  width: 40px; height: 40px;
+  background: var(--accent);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 18px; color: white;
+}
+.logo h1 {
+  font-size: 20px; font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.logo h1 span { color: var(--accent-bright); }
+.header-badge {
+  font-size: 12px; color: var(--text-muted);
+  background: var(--bg-card);
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+
+/* Search Panel */
+.search-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin: 24px 0;
+  padding: 28px;
+  box-shadow: var(--shadow);
+}
+.search-panel h2 {
+  font-size: 15px; font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 8px;
+}
+.search-panel h2::before {
+  content: '';
+  width: 3px; height: 16px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.search-grid {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 16px;
+  align-items: end;
+}
+@media (max-width: 768px) {
+  .search-grid { grid-template-columns: 1fr; }
+}
+
+.field-group { display: flex; flex-direction: column; gap: 6px; }
+.field-group label {
+  font-size: 12px; font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.company-input-area {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.company-chips {
+  display: flex; flex-wrap: wrap; gap: 6px; min-height: 28px;
+}
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(59,130,246,0.3);
+  color: var(--accent-bright);
+  padding: 4px 10px 4px 12px;
+  border-radius: 20px;
+  font-size: 13px; font-weight: 500;
+}
+.chip .remove {
+  cursor: pointer;
+  width: 16px; height: 16px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: rgba(59,130,246,0.2);
+  font-size: 11px; line-height: 1;
+  transition: background 0.15s;
+}
+.chip .remove:hover { background: rgba(239,68,68,0.4); color: white; }
+
+.input-with-suggest { position: relative; }
+input[type="text"], select {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+input[type="text"]:focus, select:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+input::placeholder { color: var(--text-muted); }
+
+.suggest-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  max-height: 240px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: var(--shadow);
+}
+.suggest-dropdown.show { display: block; }
+.suggest-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid rgba(42,53,84,0.5);
+  transition: background 0.1s;
+}
+.suggest-item:last-child { border-bottom: none; }
+.suggest-item:hover { background: var(--bg-card-hover); }
+.suggest-item .corp-name { font-weight: 500; }
+.suggest-item .stock-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--text-muted);
+}
+
+.period-selects {
+  display: flex; gap: 8px;
+}
+select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235a6b8a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+  min-width: 100px;
+}
+
+.btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex; align-items: center; gap: 8px;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--accent);
+  color: white;
+}
+.btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled {
+  opacity: 0.5; cursor: not-allowed; transform: none;
+}
+
+/* History */
+.history-bar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0;
+  overflow-x: auto;
+  margin-bottom: 8px;
+}
+.history-bar-label {
+  font-size: 12px; color: var(--text-muted); white-space: nowrap;
+  font-weight: 500;
+}
+.history-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.history-chip:hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+.history-chip .hist-corps { font-weight: 500; color: var(--text-primary); }
+.history-chip .hist-period { color: var(--text-muted); margin-left: 4px; }
+
+/* Loading */
+.loading-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10,14,23,0.85);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 16px;
+}
+.loading-overlay.show { display: flex; }
+.spinner {
+  width: 48px; height: 48px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text {
+  font-size: 14px; color: var(--text-secondary);
+}
+
+/* Results Area */
+.results-area { margin: 24px 0 48px; }
+
+.results-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap; gap: 12px;
+}
+.results-title {
+  font-size: 16px; font-weight: 600;
+}
+.results-meta {
+  font-size: 12px; color: var(--text-muted);
+}
+
+/* Toggle */
+.view-toggle {
+  display: inline-flex;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.view-toggle button {
+  padding: 8px 18px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.view-toggle button.active {
+  background: var(--accent);
+  color: white;
+}
+
+/* Tables */
+.table-container {
+  overflow-x: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+thead th {
+  background: var(--bg-secondary);
+  padding: 12px 16px;
+  text-align: right;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-secondary);
+  border-bottom: 2px solid var(--border);
+  position: sticky; top: 0; z-index: 10;
+  white-space: nowrap;
+}
+thead th:first-child {
+  text-align: left;
+  position: sticky; left: 0; z-index: 11;
+  background: var(--bg-secondary);
+  min-width: 200px;
+}
+tbody td {
+  padding: 10px 16px;
+  text-align: right;
+  border-bottom: 1px solid rgba(42,53,84,0.4);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  white-space: nowrap;
+}
+tbody td:first-child {
+  text-align: left;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  position: sticky; left: 0;
+  background: var(--bg-card);
+  z-index: 5;
+}
+tbody tr:hover td { background: var(--bg-card-hover); }
+tbody tr:hover td:first-child { background: var(--bg-card-hover); }
+
+.section-row td {
+  background: rgba(59,130,246,0.08) !important;
+  font-weight: 700 !important;
+  font-family: 'Noto Sans KR', sans-serif !important;
+  font-size: 13px !important;
+  color: var(--accent-bright);
+  border-top: 2px solid rgba(59,130,246,0.2);
+}
+
+.negative { color: var(--red); }
+.positive { color: var(--green); }
+
+/* Report Links */
+.report-links {
+  margin-top: 16px;
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.report-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--accent-bright);
+  text-decoration: none;
+  font-size: 13px; font-weight: 500;
+  transition: all 0.15s;
+}
+.report-link:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+}
+.report-link svg { width: 14px; height: 14px; }
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 80px 24px;
+  color: var(--text-muted);
+}
+.empty-state-icon {
+  font-size: 48px; margin-bottom: 16px; opacity: 0.3;
+}
+.empty-state h3 {
+  font-size: 18px; font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.empty-state p { font-size: 14px; }
+
+/* Error */
+.error-banner {
+  display: none;
+  background: var(--red-dim);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  color: var(--red);
+  font-size: 13px;
+}
+.error-banner.show { display: block; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* Footer */
+footer {
+  padding: 24px 0;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+footer a { color: var(--accent-bright); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="logo">
+      <div class="logo-icon">D</div>
+      <h1>DART <span>공시 비교</span></h1>
+    </div>
+    <div class="header-badge">OpenDART API 기반 재무제표 통합 조회</div>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- History Bar -->
+  <div class="history-bar" id="historyBar" style="display:none;">
+    <span class="history-bar-label">최근 조회 ▸</span>
+    <div id="historyChips"></div>
+  </div>
+
+  <!-- Search Panel -->
+  <div class="search-panel">
+    <h2>기업 검색 및 조회</h2>
+    <div class="search-grid">
+      <div class="field-group">
+        <label>기업명 / 종목코드 (최대 5개)</label>
+        <div class="company-input-area">
+          <div class="company-chips" id="companyChips"></div>
+          <div class="input-with-suggest">
+            <input type="text" id="companyInput" placeholder="삼성전자, 005930 등 입력 후 선택..."
+                   autocomplete="off" />
+            <div class="suggest-dropdown" id="suggestDropdown"></div>
+          </div>
+        </div>
+      </div>
+      <div class="field-group">
+        <label>조회 기간</label>
+        <div class="period-selects">
+          <select id="yearSelect"></select>
+          <select id="quarterSelect">
+            <option value="11013">1분기</option>
+            <option value="11012">반기</option>
+            <option value="11014">3분기</option>
+            <option value="11011">사업보고서</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group">
+        <label>&nbsp;</label>
+        <button class="btn btn-primary" id="searchBtn" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          조회
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="error-banner" id="errorBanner"></div>
+
+  <!-- Results -->
+  <div class="results-area" id="resultsArea">
+    <div class="empty-state">
+      <div class="empty-state-icon">📊</div>
+      <h3>기업을 선택하고 조회하세요</h3>
+      <p>최대 5개 기업의 재무제표를 한눈에 비교할 수 있습니다</p>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="container">
+    데이터 출처: <a href="https://opendart.fss.or.kr" target="_blank" rel="noopener">금융감독원 전자공시시스템 OpenDART</a>
+    &nbsp;·&nbsp; 본 서비스는 투자 참고용이며, 투자 판단의 책임은 이용자에게 있습니다.
+  </div>
+</footer>
+
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">재무 데이터를 불러오는 중...</div>
+</div>
+
+<script>
+// ============================================================
+// DART 공시 비교 조회 시스템
+// ============================================================
+
+const API_BASE = '/api';
+
+// ---------- State ----------
+let corpList = [];         // 전체 기업 목록 (corpCode.xml에서 로드)
+let selectedCorps = [];    // 선택된 기업 [{corp_code, corp_name, stock_code}]
+let searchHistory = [];    // 최근 조회 히스토리
+let currentView = 'key';  // 'key' | 'full'
+let lastResults = null;    // 마지막 조회 결과
+
+// ---------- Major Korean Companies Fallback Data ----------
+// Built-in 주요 상장사 목록 (corpCode.xml 로딩 실패 시 폴백)
+const MAJOR_CORPS = [
+  {corp_code:'00126380',corp_name:'삼성전자',stock_code:'005930'},
+  {corp_code:'00164779',corp_name:'SK하이닉스',stock_code:'000660'},
+  {corp_code:'00260985',corp_name:'LG에너지솔루션',stock_code:'373220'},
+  {corp_code:'00104299',corp_name:'삼성바이오로직스',stock_code:'207940'},
+  {corp_code:'00401731',corp_name:'현대자동차',stock_code:'005380'},
+  {corp_code:'00145765',corp_name:'기아',stock_code:'000270'},
+  {corp_code:'00356361',corp_name:'셀트리온',stock_code:'068270'},
+  {corp_code:'00258801',corp_name:'KB금융',stock_code:'105560'},
+  {corp_code:'00126186',corp_name:'신한지주',stock_code:'055550'},
+  {corp_code:'00382199',corp_name:'NAVER',stock_code:'035420'},
+  {corp_code:'00258999',corp_name:'카카오',stock_code:'035720'},
+  {corp_code:'00164742',corp_name:'삼성SDI',stock_code:'006400'},
+  {corp_code:'00126308',corp_name:'삼성물산',stock_code:'028260'},
+  {corp_code:'00232089',corp_name:'LG화학',stock_code:'051910'},
+  {corp_code:'00107907',corp_name:'포스코홀딩스',stock_code:'005490'},
+  {corp_code:'00102379',corp_name:'현대모비스',stock_code:'012330'},
+  {corp_code:'00401614',corp_name:'LG전자',stock_code:'066570'},
+  {corp_code:'00155276',corp_name:'SK이노베이션',stock_code:'096770'},
+  {corp_code:'00687035',corp_name:'크래프톤',stock_code:'259960'},
+  {corp_code:'00156091',corp_name:'SK텔레콤',stock_code:'017670'},
+  {corp_code:'00252481',corp_name:'KT',stock_code:'030200'},
+  {corp_code:'00159221',corp_name:'하나금융지주',stock_code:'086790'},
+  {corp_code:'00429937',corp_name:'삼성생명',stock_code:'032830'},
+  {corp_code:'00547583',corp_name:'카카오뱅크',stock_code:'323410'},
+  {corp_code:'00187198',corp_name:'한화에어로스페이스',stock_code:'012450'},
+  {corp_code:'00126181',corp_name:'삼성화재',stock_code:'000810'},
+  {corp_code:'00252487',corp_name:'우리금융지주',stock_code:'316140'},
+  {corp_code:'00126243',corp_name:'삼성전기',stock_code:'009150'},
+  {corp_code:'00177472',corp_name:'두산에너빌리티',stock_code:'034020'},
+  {corp_code:'00293886',corp_name:'엔씨소프트',stock_code:'036570'},
+  {corp_code:'00161941',corp_name:'SK',stock_code:'034730'},
+  {corp_code:'00164618',corp_name:'LG',stock_code:'003550'},
+  {corp_code:'00205765',corp_name:'한국전력',stock_code:'015760'},
+  {corp_code:'00631518',corp_name:'카카오페이',stock_code:'377300'},
+  {corp_code:'00179984',corp_name:'HJ중공업',stock_code:'010620'},
+  {corp_code:'00117554',corp_name:'HD현대중공업',stock_code:'329180'},
+  {corp_code:'00155319',corp_name:'한국항공우주',stock_code:'047810'},
+  {corp_code:'00126203',corp_name:'현대건설',stock_code:'000720'},
+  {corp_code:'00158722',corp_name:'롯데케미칼',stock_code:'011170'},
+  {corp_code:'00107605',corp_name:'CJ제일제당',stock_code:'097950'},
+  {corp_code:'00113961',corp_name:'아모레퍼시픽',stock_code:'090430'},
+  {corp_code:'00100601',corp_name:'넷마블',stock_code:'251270'},
+  {corp_code:'00126191',corp_name:'삼성증권',stock_code:'016360'},
+  {corp_code:'00192226',corp_name:'SK바이오팜',stock_code:'326030'},
+  {corp_code:'00140578',corp_name:'LG이노텍',stock_code:'011070'},
+  {corp_code:'00118306',corp_name:'한미약품',stock_code:'128940'},
+  {corp_code:'00119488',corp_name:'CJ ENM',stock_code:'035760'},
+  {corp_code:'00131054',corp_name:'한온시스템',stock_code:'018880'},
+  {corp_code:'00145020',corp_name:'대한항공',stock_code:'003490'},
+];
+
+// ---------- DOM Elements ----------
+const $ = id => document.getElementById(id);
+const companyInput = $('companyInput');
+const suggestDropdown = $('suggestDropdown');
+const companyChips = $('companyChips');
+const yearSelect = $('yearSelect');
+const quarterSelect = $('quarterSelect');
+const searchBtn = $('searchBtn');
+const resultsArea = $('resultsArea');
+const errorBanner = $('errorBanner');
+const loading = $('loading');
+const loadingText = $('loadingText');
+const historyBar = $('historyBar');
+const historyChips = $('historyChips');
+
+// ---------- Init ----------
+(async function init() {
+  populateYears();
+  loadHistory();
+  await loadCorpList();
+  setupEventListeners();
+})();
+
+function populateYears() {
+  const thisYear = new Date().getFullYear();
+  for (let y = thisYear; y >= 2015; y--) {
+    const opt = document.createElement('option');
+    opt.value = y; opt.textContent = `${y}년`;
+    yearSelect.appendChild(opt);
+  }
+}
+
+// ---------- Corp List Loading ----------
+async function loadCorpList() {
+  try {
+    showLoading('기업 목록을 불러오는 중...');
+    const resp = await fetch(`${API_BASE}/corpCode.xml`);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    
+    const contentType = resp.headers.get('content-type') || '';
+    
+    if (contentType.includes('zip') || contentType.includes('octet')) {
+      // Handle zip response - use JSZip if available or parse manually
+      const arrayBuf = await resp.arrayBuffer();
+      const blob = new Blob([arrayBuf], {type: 'application/zip'});
+      
+      // Dynamic import of a simple zip parser approach
+      // Since we can't use JSZip on Cloudflare easily, we use a different approach
+      // We'll use the built-in corp list + company.json API for search
+      console.log('Zip response received, using built-in corp list + API fallback');
+      corpList = [...MAJOR_CORPS];
+    } else {
+      // Maybe it's JSON error response
+      const text = await resp.text();
+      try {
+        const json = JSON.parse(text);
+        if (json.status && json.status !== '000') {
+          console.warn('DART API error:', json.message);
+        }
+      } catch(e) { /* not JSON */ }
+      corpList = [...MAJOR_CORPS];
+    }
+  } catch (err) {
+    console.warn('Corp list load failed, using built-in list:', err);
+    corpList = [...MAJOR_CORPS];
+  } finally {
+    hideLoading();
+  }
+}
+
+// ---------- Event Listeners ----------
+function setupEventListeners() {
+  let debounceTimer = null;
+  
+  companyInput.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    const query = companyInput.value.trim();
+    if (query.length < 1) {
+      hideSuggest();
+      return;
+    }
+    debounceTimer = setTimeout(() => showSuggestions(query), 150);
+  });
+  
+  companyInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') hideSuggest();
+  });
+  
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.input-with-suggest')) hideSuggest();
+  });
+  
+  searchBtn.addEventListener('click', performSearch);
+  
+  companyInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const firstItem = suggestDropdown.querySelector('.suggest-item');
+      if (firstItem) firstItem.click();
+    }
+  });
+}
+
+// ---------- Suggestions ----------
+function showSuggestions(query) {
+  const q = query.toLowerCase();
+  const results = corpList.filter(c => {
+    const nameMatch = c.corp_name.toLowerCase().includes(q);
+    const codeMatch = c.stock_code && c.stock_code.includes(q);
+    const alreadySelected = selectedCorps.some(s => s.corp_code === c.corp_code);
+    return (nameMatch || codeMatch) && !alreadySelected && c.stock_code;
+  }).slice(0, 10);
+  
+  if (results.length === 0) {
+    // Try company.json API for search
+    searchCompanyAPI(query);
+    return;
+  }
+  
+  renderSuggestions(results);
+}
+
+async function searchCompanyAPI(query) {
+  // If query looks like a stock code (6 digits), try looking up directly
+  // Otherwise show no results message
+  suggestDropdown.innerHTML = `
+    <div class="suggest-item" style="color: var(--text-muted); cursor:default; justify-content:center;">
+      검색 중... (내장 목록에 없는 경우 종목코드 6자리를 정확히 입력해주세요)
+    </div>
+  `;
+  suggestDropdown.classList.add('show');
+  
+  // If it's a 6-digit code, try to look it up via company.json
+  if (/^\d{6}$/.test(query.trim())) {
+    try {
+      // We need corp_code to query. Use list API to find by stock code.
+      // Actually DART doesn't have a stock-code lookup API directly.
+      // We'll need to add this corp to our list.
+      suggestDropdown.innerHTML = `
+        <div class="suggest-item" style="color: var(--text-muted); cursor:default; justify-content:center;">
+          종목코드 ${query}에 해당하는 기업을 찾을 수 없습니다. 기업명으로 검색해보세요.
+        </div>
+      `;
+    } catch(e) {
+      hideSuggest();
+    }
+  } else {
+    suggestDropdown.innerHTML = `
+      <div class="suggest-item" style="color: var(--text-muted); cursor:default; justify-content:center;">
+        "${query}"에 대한 검색 결과가 없습니다
+      </div>
+    `;
+  }
+  suggestDropdown.classList.add('show');
+}
+
+function renderSuggestions(results) {
+  suggestDropdown.innerHTML = results.map(c => `
+    <div class="suggest-item" data-code="${c.corp_code}" data-name="${c.corp_name}" data-stock="${c.stock_code || ''}">
+      <span class="corp-name">${c.corp_name}</span>
+      <span class="stock-code">${c.stock_code || '-'}</span>
+    </div>
+  `).join('');
+  
+  suggestDropdown.querySelectorAll('.suggest-item').forEach(item => {
+    item.addEventListener('click', () => {
+      addCompany({
+        corp_code: item.dataset.code,
+        corp_name: item.dataset.name,
+        stock_code: item.dataset.stock,
+      });
+      companyInput.value = '';
+      hideSuggest();
+    });
+  });
+  
+  suggestDropdown.classList.add('show');
+}
+
+function hideSuggest() {
+  suggestDropdown.classList.remove('show');
+}
+
+// ---------- Company Chips ----------
+function addCompany(corp) {
+  if (selectedCorps.length >= 5) {
+    showError('최대 5개 기업까지 선택할 수 있습니다.');
+    return;
+  }
+  if (selectedCorps.some(c => c.corp_code === corp.corp_code)) return;
+  
+  selectedCorps.push(corp);
+  renderChips();
+  updateSearchBtn();
+}
+
+function removeCompany(corpCode) {
+  selectedCorps = selectedCorps.filter(c => c.corp_code !== corpCode);
+  renderChips();
+  updateSearchBtn();
+}
+
+function renderChips() {
+  companyChips.innerHTML = selectedCorps.map(c => `
+    <span class="chip">
+      ${c.corp_name}
+      <span class="remove" onclick="removeCompany('${c.corp_code}')">✕</span>
+    </span>
+  `).join('');
+}
+
+function updateSearchBtn() {
+  searchBtn.disabled = selectedCorps.length === 0;
+}
+
+// ---------- Search / Fetch ----------
+async function performSearch() {
+  if (selectedCorps.length === 0) return;
+  
+  const year = yearSelect.value;
+  const reprtCode = quarterSelect.value;
+  const quarterLabel = quarterSelect.options[quarterSelect.selectedIndex].text;
+  
+  showLoading('재무 데이터를 불러오는 중...');
+  hideError();
+  
+  try {
+    const results = [];
+    
+    for (let i = 0; i < selectedCorps.length; i++) {
+      const corp = selectedCorps[i];
+      loadingText.textContent = `${corp.corp_name} 데이터 조회 중... (${i+1}/${selectedCorps.length})`;
+      
+      // Fetch full financial statements (단일 기준 = OFS)
+      const data = await fetchFinancialData(corp.corp_code, year, reprtCode, 'OFS');
+      
+      results.push({
+        corp,
+        data,
+        year,
+        reprtCode,
+        quarterLabel,
+      });
+    }
+    
+    lastResults = { results, year, quarterLabel };
+    currentView = 'key';
+    renderResults(results, year, quarterLabel);
+    
+    // Save to history
+    saveToHistory(selectedCorps.map(c => ({...c})), year, reprtCode, quarterLabel);
+    
+  } catch (err) {
+    showError(`조회 실패: ${err.message}`);
+  } finally {
+    hideLoading();
+  }
+}
+
+async function fetchFinancialData(corpCode, year, reprtCode, fsDiv) {
+  const url = `${API_BASE}/fnlttSinglAcntAll.json?corp_code=${corpCode}&bsns_year=${year}&reprt_code=${reprtCode}&fs_div=${fsDiv}`;
+  
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  
+  const json = await resp.json();
+  
+  if (json.status === '013') {
+    // No data - try fnlttSinglAcnt (주요계정)
+    const url2 = `${API_BASE}/fnlttSinglAcnt.json?corp_code=${corpCode}&bsns_year=${year}&reprt_code=${reprtCode}`;
+    const resp2 = await fetch(url2);
+    const json2 = await resp2.json();
+    
+    if (json2.status === '000' && json2.list) {
+      return { items: json2.list, type: 'summary' };
+    }
+    return { items: [], type: 'empty' };
+  }
+  
+  if (json.status !== '000') {
+    throw new Error(json.message || `DART API 오류 (${json.status})`);
+  }
+  
+  return { items: json.list || [], type: 'full' };
+}
+
+// ---------- Rendering ----------
+const KEY_ACCOUNTS_IS = [
+  '매출액', '수익(매출액)', '영업수익', '매출',
+  '매출원가',
+  '매출총이익',
+  '판매비와관리비', '판매비와 관리비',
+  '영업이익', '영업이익(손실)',
+  '금융수익', '금융이익',
+  '금융비용', '금융원가',
+  '법인세비용차감전순이익', '법인세비용차감전순이익(손실)',
+  '법인세비용',
+  '당기순이익', '당기순이익(손실)',
+  '기본주당이익', '기본주당이익(손실)',
+];
+
+const KEY_ACCOUNTS_BS = [
+  '자산총계',
+  '유동자산',
+  '비유동자산',
+  '부채총계',
+  '유동부채',
+  '비유동부채',
+  '자본총계',
+  '이익잉여금',
+];
+
+const SJ_DIV_MAP = {
+  'BS': '재무상태표',
+  'IS': '손익계산서',
+  'CIS': '포괄손익계산서',
+  'CF': '현금흐름표',
+  'SCE': '자본변동표',
+};
+
+function renderResults(results, year, quarterLabel) {
+  const validResults = results.filter(r => r.data.items.length > 0);
+  
+  if (validResults.length === 0) {
+    resultsArea.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">🔍</div>
+        <h3>조회 결과가 없습니다</h3>
+        <p>${year}년 ${quarterLabel} 데이터를 찾을 수 없습니다. 다른 기간을 선택해보세요.</p>
+      </div>
+    `;
+    return;
+  }
+  
+  resultsArea.innerHTML = `
+    <div class="results-header">
+      <div>
+        <div class="results-title">${year}년 ${quarterLabel} 재무제표 비교</div>
+        <div class="results-meta">단일(별도) 재무제표 기준 · ${validResults.length}개 기업</div>
+      </div>
+      <div class="view-toggle" id="viewToggle">
+        <button class="${currentView === 'key' ? 'active' : ''}" data-view="key">주요 지표</button>
+        <button class="${currentView === 'full' ? 'active' : ''}" data-view="full">전체 재무제표</button>
+      </div>
+    </div>
+    <div id="tableArea"></div>
+    <div class="report-links" id="reportLinks"></div>
+  `;
+  
+  // Toggle buttons
+  document.querySelectorAll('#viewToggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentView = btn.dataset.view;
+      document.querySelectorAll('#viewToggle button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderTable(validResults);
+    });
+  });
+  
+  renderTable(validResults);
+  renderReportLinks(validResults);
+}
+
+function renderTable(results) {
+  const tableArea = $('tableArea');
+  
+  if (currentView === 'key') {
+    renderKeyTable(results, tableArea);
+  } else {
+    renderFullTable(results, tableArea);
+  }
+}
+
+function getAmountValue(item, reprtCode) {
+  // For IS/CIS items, use accumulated amount (thstrm_add_amount) for quarterly reports
+  // For BS items, use thstrm_amount
+  const sjDiv = item.sj_div;
+  
+  if (sjDiv === 'BS') {
+    return item.thstrm_amount || '';
+  }
+  
+  // For income statement items in quarterly reports, prefer accumulated amount
+  if (reprtCode !== '11011') {
+    // Quarterly - use accumulated
+    return item.thstrm_add_amount || item.thstrm_amount || '';
+  }
+  
+  return item.thstrm_amount || '';
+}
+
+function formatAmount(amountStr) {
+  if (!amountStr || amountStr === '') return '-';
+  const num = parseInt(amountStr.replace(/,/g, ''), 10);
+  if (isNaN(num)) return amountStr;
+  
+  // Format in 억 단위
+  const billions = num / 100000000;
+  if (Math.abs(billions) >= 1) {
+    return (billions >= 0 ? '' : '') + Math.round(billions).toLocaleString('ko-KR') + '억';
+  }
+  return num.toLocaleString('ko-KR');
+}
+
+function formatAmountRaw(amountStr) {
+  if (!amountStr || amountStr === '') return '-';
+  return amountStr;
+}
+
+function renderKeyTable(results, container) {
+  const corpHeaders = results.map(r => `<th>${r.corp.corp_name}</th>`).join('');
+  
+  let rows = '';
+  
+  // --- 손익계산서 주요 항목 ---
+  rows += `<tr class="section-row"><td colspan="${results.length + 1}">📈 손익계산서 (누적)</td></tr>`;
+  
+  for (const accountName of KEY_ACCOUNTS_IS) {
+    const rowData = results.map(r => {
+      const item = r.data.items.find(i => 
+        (i.sj_div === 'IS' || i.sj_div === 'CIS') && 
+        i.account_nm === accountName
+      );
+      if (!item) return null;
+      return getAmountValue(item, r.reprtCode);
+    });
+    
+    // Only render if at least one corp has data
+    if (rowData.some(v => v !== null && v !== '')) {
+      const cells = rowData.map(v => {
+        const formatted = formatAmount(v);
+        const isNeg = v && v.replace(/,/g, '').startsWith('-');
+        return `<td class="${isNeg ? 'negative' : ''}">${formatted}</td>`;
+      }).join('');
+      
+      rows += `<tr><td>${accountName}</td>${cells}</tr>`;
+    }
+  }
+  
+  // --- 인건비, 판관비 세부 (try to find) ---
+  const sgaAccounts = [
+    '급여', '퇴직급여', '복리후생비', '감가상각비',
+    '연구개발비', '광고선전비', '경상연구개발비',
+  ];
+  
+  let hasSGA = false;
+  for (const accountName of sgaAccounts) {
+    const found = results.some(r => 
+      r.data.items.some(i => i.account_nm === accountName && (i.sj_div === 'IS' || i.sj_div === 'CIS'))
+    );
+    if (found) { hasSGA = true; break; }
+  }
+  
+  if (hasSGA) {
+    rows += `<tr class="section-row"><td colspan="${results.length + 1}">📋 판관비 세부 (누적)</td></tr>`;
+    for (const accountName of sgaAccounts) {
+      const rowData = results.map(r => {
+        const item = r.data.items.find(i => 
+          (i.sj_div === 'IS' || i.sj_div === 'CIS') && 
+          i.account_nm === accountName
+        );
+        if (!item) return null;
+        return getAmountValue(item, r.reprtCode);
+      });
+      
+      if (rowData.some(v => v !== null && v !== '')) {
+        const cells = rowData.map(v => {
+          const formatted = formatAmount(v);
+          const isNeg = v && v.replace(/,/g, '').startsWith('-');
+          return `<td class="${isNeg ? 'negative' : ''}">${formatted}</td>`;
+        }).join('');
+        rows += `<tr><td>&nbsp;&nbsp;${accountName}</td>${cells}</tr>`;
+      }
+    }
+  }
+  
+  // --- 재무상태표 주요 항목 ---
+  rows += `<tr class="section-row"><td colspan="${results.length + 1}">🏦 재무상태표</td></tr>`;
+  
+  for (const accountName of KEY_ACCOUNTS_BS) {
+    const rowData = results.map(r => {
+      const item = r.data.items.find(i => 
+        i.sj_div === 'BS' && i.account_nm === accountName
+      );
+      if (!item) return null;
+      return item.thstrm_amount || '';
+    });
+    
+    if (rowData.some(v => v !== null && v !== '')) {
+      const cells = rowData.map(v => {
+        const formatted = formatAmount(v);
+        return `<td>${formatted}</td>`;
+      }).join('');
+      rows += `<tr><td>${accountName}</td>${cells}</tr>`;
+    }
+  }
+  
+  // --- 수익성 지표 (계산) ---
+  rows += `<tr class="section-row"><td colspan="${results.length + 1}">📐 수익성 지표</td></tr>`;
+  
+  // 영업이익률
+  const profitMarginCells = results.map(r => {
+    const revenue = findAccountAmount(r, ['매출액', '수익(매출액)', '영업수익', '매출'], ['IS', 'CIS']);
+    const opIncome = findAccountAmount(r, ['영업이익', '영업이익(손실)'], ['IS', 'CIS']);
+    if (revenue && opIncome) {
+      const margin = (opIncome / revenue * 100).toFixed(1);
+      const cls = parseFloat(margin) < 0 ? 'negative' : 'positive';
+      return `<td class="${cls}">${margin}%</td>`;
+    }
+    return '<td>-</td>';
+  }).join('');
+  rows += `<tr><td>영업이익률</td>${profitMarginCells}</tr>`;
+  
+  // 순이익률
+  const netMarginCells = results.map(r => {
+    const revenue = findAccountAmount(r, ['매출액', '수익(매출액)', '영업수익', '매출'], ['IS', 'CIS']);
+    const netIncome = findAccountAmount(r, ['당기순이익', '당기순이익(손실)'], ['IS', 'CIS']);
+    if (revenue && netIncome) {
+      const margin = (netIncome / revenue * 100).toFixed(1);
+      const cls = parseFloat(margin) < 0 ? 'negative' : 'positive';
+      return `<td class="${cls}">${margin}%</td>`;
+    }
+    return '<td>-</td>';
+  }).join('');
+  rows += `<tr><td>순이익률</td>${netMarginCells}</tr>`;
+  
+  // 부채비율
+  const debtRatioCells = results.map(r => {
+    const debt = findBSAmount(r, ['부채총계']);
+    const equity = findBSAmount(r, ['자본총계']);
+    if (debt && equity && equity !== 0) {
+      const ratio = (debt / equity * 100).toFixed(1);
+      return `<td>${ratio}%</td>`;
+    }
+    return '<td>-</td>';
+  }).join('');
+  rows += `<tr><td>부채비율</td>${debtRatioCells}</tr>`;
+  
+  container.innerHTML = `
+    <div class="table-container">
+      <table>
+        <thead><tr><th>항목</th>${corpHeaders}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function findAccountAmount(result, names, sjDivs) {
+  for (const name of names) {
+    const item = result.data.items.find(i => 
+      sjDivs.includes(i.sj_div) && i.account_nm === name
+    );
+    if (item) {
+      const val = getAmountValue(item, result.reprtCode);
+      if (val) return parseInt(val.replace(/,/g, ''), 10);
+    }
+  }
+  return null;
+}
+
+function findBSAmount(result, names) {
+  for (const name of names) {
+    const item = result.data.items.find(i => i.sj_div === 'BS' && i.account_nm === name);
+    if (item && item.thstrm_amount) {
+      return parseInt(item.thstrm_amount.replace(/,/g, ''), 10);
+    }
+  }
+  return null;
+}
+
+function renderFullTable(results, container) {
+  const corpHeaders = results.map(r => `<th>${r.corp.corp_name}</th>`).join('');
+  
+  // Group by sj_div
+  const allSjDivs = ['BS', 'IS', 'CIS', 'CF', 'SCE'];
+  
+  let rows = '';
+  
+  for (const sjDiv of allSjDivs) {
+    // Collect all unique account names for this sj_div across all corps
+    const accountNames = [];
+    const seen = new Set();
+    
+    for (const r of results) {
+      for (const item of r.data.items) {
+        if (item.sj_div === sjDiv && !seen.has(item.account_nm)) {
+          seen.add(item.account_nm);
+          accountNames.push(item.account_nm);
+        }
+      }
+    }
+    
+    if (accountNames.length === 0) continue;
+    
+    const label = SJ_DIV_MAP[sjDiv] || sjDiv;
+    rows += `<tr class="section-row"><td colspan="${results.length + 1}">${label}</td></tr>`;
+    
+    for (const accountName of accountNames) {
+      const cells = results.map(r => {
+        const item = r.data.items.find(i => i.sj_div === sjDiv && i.account_nm === accountName);
+        if (!item) return '<td>-</td>';
+        
+        let val;
+        if (sjDiv === 'BS') {
+          val = item.thstrm_amount || '';
+        } else {
+          val = (r.reprtCode !== '11011')
+            ? (item.thstrm_add_amount || item.thstrm_amount || '')
+            : (item.thstrm_amount || '');
+        }
+        
+        const formatted = formatAmount(val);
+        const isNeg = val && val.replace(/,/g, '').startsWith('-');
+        return `<td class="${isNeg ? 'negative' : ''}">${formatted}</td>`;
+      }).join('');
+      
+      rows += `<tr><td>${accountName}</td>${cells}</tr>`;
+    }
+  }
+  
+  container.innerHTML = `
+    <div class="table-container" style="max-height: 600px; overflow-y: auto;">
+      <table>
+        <thead><tr><th>항목</th>${corpHeaders}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderReportLinks(results) {
+  const linksContainer = $('reportLinks');
+  linksContainer.innerHTML = results.map(r => {
+    const rceptNo = r.data.items[0]?.rcept_no;
+    if (!rceptNo) return '';
+    const url = `https://dart.fss.or.kr/dsaf001/main.do?rcpNo=${rceptNo}`;
+    return `
+      <a href="${url}" target="_blank" rel="noopener" class="report-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          <polyline points="15 3 21 3 21 9"/>
+          <line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+        ${r.corp.corp_name} 보고서 원문
+      </a>
+    `;
+  }).join('');
+}
+
+// ---------- History ----------
+function saveToHistory(corps, year, reprtCode, quarterLabel) {
+  const key = corps.map(c => c.corp_code).sort().join(',') + `_${year}_${reprtCode}`;
+  
+  // Remove duplicate
+  searchHistory = searchHistory.filter(h => h.key !== key);
+  
+  // Add to front
+  searchHistory.unshift({
+    key,
+    corps,
+    year,
+    reprtCode,
+    quarterLabel,
+    timestamp: Date.now(),
+  });
+  
+  // Max 3
+  if (searchHistory.length > 3) searchHistory = searchHistory.slice(0, 3);
+  
+  localStorage.setItem('dart_history', JSON.stringify(searchHistory));
+  renderHistory();
+}
+
+function loadHistory() {
+  try {
+    const stored = localStorage.getItem('dart_history');
+    if (stored) {
+      searchHistory = JSON.parse(stored);
+      renderHistory();
+    }
+  } catch(e) { searchHistory = []; }
+}
+
+function renderHistory() {
+  if (searchHistory.length === 0) {
+    historyBar.style.display = 'none';
+    return;
+  }
+  
+  historyBar.style.display = 'flex';
+  historyChips.innerHTML = searchHistory.map((h, idx) => `
+    <div class="history-chip" data-idx="${idx}">
+      <span class="hist-corps">${h.corps.map(c => c.corp_name).join(', ')}</span>
+      <span class="hist-period">${h.year} ${h.quarterLabel}</span>
+    </div>
+  `).join('');
+  
+  historyChips.querySelectorAll('.history-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const idx = parseInt(chip.dataset.idx);
+      const h = searchHistory[idx];
+      
+      selectedCorps = h.corps.map(c => ({...c}));
+      yearSelect.value = h.year;
+      quarterSelect.value = h.reprtCode;
+      
+      renderChips();
+      updateSearchBtn();
+      performSearch();
+    });
+  });
+}
+
+// ---------- UI Helpers ----------
+function showLoading(text) {
+  loadingText.textContent = text || '로딩 중...';
+  loading.classList.add('show');
+}
+function hideLoading() { loading.classList.remove('show'); }
+
+function showError(msg) {
+  errorBanner.textContent = msg;
+  errorBanner.classList.add('show');
+  setTimeout(() => hideError(), 8000);
+}
+function hideError() { errorBanner.classList.remove('show'); }
+</script>
+
+</body>
+</html>
