@@ -1,0 +1,8 @@
+name = "dart-viewer"
+compatibility_date = "2024-01-01"
+
+[assets]
+directory = "./public"
+
+[vars]
+DART_API_KEY = "a9a1b6d42a2414cc31a9f0f809369d8eab15a2ba"
