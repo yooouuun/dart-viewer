@@ -1,78 +1,47 @@
-// Cloudflare Worker - DART API Proxy
-// Handles /api/* requests as a proxy to DART OpenAPI
-// Static files in /public are served automatically by [assets]
-
 const DART_API_BASE = 'https://opendart.fss.or.kr/api';
 
 export default {
-  async fetch(request, env, ctx) {
+  async fetch(request, env) {
     const url = new URL(request.url);
 
-    // Only handle /api/* paths - everything else goes to static assets
     if (!url.pathname.startsWith('/api/')) {
-      return env.ASSETS.fetch(request);
+      return new Response(null, { status: 404 });
     }
 
-    // Handle CORS preflight
     if (request.method === 'OPTIONS') {
-      return new Response(null, {
-        status: 204,
-        headers: corsHeaders(),
-      });
+      return new Response(null, { status: 204, headers: corsHeaders() });
     }
 
-    // Extract DART API endpoint from path: /api/fnlttSinglAcnt.json -> fnlttSinglAcnt.json
     const apiPath = url.pathname.replace('/api/', '');
-
     if (!apiPath) {
-      return jsonResponse({ error: 'No API path specified' }, 400);
+      return resp({ error: 'No API path' }, 400);
     }
 
-    // Get API key
     const apiKey = env.DART_API_KEY || '';
+    const dartUrl = new URL(DART_API_BASE + '/' + apiPath);
 
-    if (!apiKey) {
-      return jsonResponse({ error: 'API key not configured' }, 500);
+    for (const [k, v] of url.searchParams.entries()) {
+      dartUrl.searchParams.set(k, v);
     }
-
-    // Build DART API URL
-    const dartUrl = new URL(`${DART_API_BASE}/${apiPath}`);
-
-    // Copy query params from request
-    for (const [key, value] of url.searchParams.entries()) {
-      dartUrl.searchParams.set(key, value);
-    }
-
-    // Inject API key
     dartUrl.searchParams.set('crtfc_key', apiKey);
 
     try {
-      const dartResponse = await fetch(dartUrl.toString());
-      const contentType = dartResponse.headers.get('content-type') || '';
+      const r = await fetch(dartUrl.toString());
+      const ct = r.headers.get('content-type') || '';
 
-      // Handle zip response (corpCode.xml)
-      if (contentType.includes('zip') || contentType.includes('octet-stream')) {
-        const blob = await dartResponse.arrayBuffer();
-        return new Response(blob, {
-          status: dartResponse.status,
-          headers: {
-            ...corsHeaders(),
-            'Content-Type': 'application/zip',
-          },
+      if (ct.includes('zip') || ct.includes('octet')) {
+        return new Response(await r.arrayBuffer(), {
+          status: r.status,
+          headers: { ...corsHeaders(), 'Content-Type': 'application/zip' },
         });
       }
 
-      // Handle JSON/XML response
-      const data = await dartResponse.text();
-      return new Response(data, {
-        status: dartResponse.status,
-        headers: {
-          ...corsHeaders(),
-          'Content-Type': contentType || 'application/json; charset=utf-8',
-        },
+      return new Response(await r.text(), {
+        status: r.status,
+        headers: { ...corsHeaders(), 'Content-Type': ct || 'application/json; charset=utf-8' },
       });
-    } catch (error) {
-      return jsonResponse({ error: error.message }, 500);
+    } catch (e) {
+      return resp({ error: e.message }, 500);
     }
   },
 };
@@ -85,12 +54,14 @@ function corsHeaders() {
   };
 }
 
-function jsonResponse(data, status = 200) {
+function resp(data, status) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: {
-      ...corsHeaders(),
-      'Content-Type': 'application/json; charset=utf-8',
-    },
+    headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
   });
 }
+```
+
+**Commit changes** 클릭 후 Cloudflare 자동 배포를 기다렸다가, 다시 아래 주소를 테스트해주세요:
+```
+https://dart-viewer.yooouuun.workers.dev/api/fnlttSinglAcnt.json?corp_code=00126380&bsns_year=2024&reprt_code=11011
