@@ -7,275 +7,284 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg-primary:#0a0e17;--bg-secondary:#111827;--bg-card:#1a2236;--bg-card-hover:#1f2a42;--bg-input:#0f1629;--border:#2a3554;--border-focus:#3b82f6;--text-primary:#e8ecf4;--text-secondary:#8899b4;--text-muted:#5a6b8a;--accent:#3b82f6;--accent-dim:rgba(59,130,246,.15);--accent-bright:#60a5fa;--green:#10b981;--red:#ef4444;--red-dim:rgba(239,68,68,.15);--radius:10px;--radius-sm:6px;--shadow:0 4px 24px rgba(0,0,0,.3)}
+:root{--bg:#0a0e17;--bg2:#111827;--card:#1a2236;--card2:#1f2a42;--inp:#0f1629;--brd:#2a3554;--brf:#3b82f6;--t1:#e8ecf4;--t2:#8899b4;--t3:#5a6b8a;--ac:#3b82f6;--acd:rgba(59,130,246,.15);--acb:#60a5fa;--grn:#10b981;--red:#ef4444;--redd:rgba(239,68,68,.15);--r:10px;--rs:6px;--sh:0 4px 24px rgba(0,0,0,.3)}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Noto Sans KR',sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100vh;line-height:1.6}
-.container{max-width:1400px;margin:0 auto;padding:0 24px}
-header{padding:32px 0 24px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(59,130,246,.06) 0%,transparent 100%)}
-header .container{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;line-height:1.6}
+.ct{max-width:1400px;margin:0 auto;padding:0 24px}
+header{padding:28px 0 20px;border-bottom:1px solid var(--brd);background:linear-gradient(180deg,rgba(59,130,246,.06),transparent)}
+header .ct{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
 .logo{display:flex;align-items:center;gap:12px}
-.logo-icon{width:40px;height:40px;background:var(--accent);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#fff}
+.logo-i{width:40px;height:40px;background:var(--ac);border-radius:var(--rs);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#fff}
 .logo h1{font-size:20px;font-weight:700;letter-spacing:-.5px}
-.logo h1 span{color:var(--accent-bright)}
-.header-badge{font-size:12px;color:var(--text-muted);background:var(--bg-card);padding:6px 14px;border-radius:20px;border:1px solid var(--border)}
-.search-panel{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);margin:24px 0;padding:28px;box-shadow:var(--shadow)}
-.search-panel h2{font-size:15px;font-weight:600;color:var(--text-secondary);margin-bottom:20px;display:flex;align-items:center;gap:8px}
-.search-panel h2::before{content:'';width:3px;height:16px;background:var(--accent);border-radius:2px}
-.search-grid{display:grid;grid-template-columns:1fr auto auto;gap:16px;align-items:end}
-@media(max-width:768px){.search-grid{grid-template-columns:1fr}}
-.field-group{display:flex;flex-direction:column;gap:6px}
-.field-group label{font-size:12px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
-.company-input-area{display:flex;flex-direction:column;gap:8px}
-.company-chips{display:flex;flex-wrap:wrap;gap:6px;min-height:28px}
-.chip{display:inline-flex;align-items:center;gap:6px;background:var(--accent-dim);border:1px solid rgba(59,130,246,.3);color:var(--accent-bright);padding:4px 10px 4px 12px;border-radius:20px;font-size:13px;font-weight:500}
-.chip .remove{cursor:pointer;width:16px;height:16px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(59,130,246,.2);font-size:11px;transition:background .15s}
-.chip .remove:hover{background:rgba(239,68,68,.4);color:#fff}
-.input-with-suggest{position:relative}
-input[type="text"],select{width:100%;padding:10px 14px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-size:14px;font-family:inherit;transition:border-color .2s,box-shadow .2s;outline:none}
-input[type="text"]:focus,select:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px var(--accent-dim)}
-input::placeholder{color:var(--text-muted)}
-.suggest-dropdown{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);max-height:280px;overflow-y:auto;z-index:100;box-shadow:var(--shadow)}
-.suggest-dropdown.show{display:block}
-.suggest-item{padding:10px 14px;cursor:pointer;font-size:13px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(42,53,84,.5);transition:background .1s}
-.suggest-item:last-child{border-bottom:none}
-.suggest-item:hover{background:var(--bg-card-hover)}
-.suggest-item .corp-name{font-weight:500}
-.suggest-item .stock-code{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-muted)}
-.suggest-item.si-info{color:var(--text-muted);cursor:default;justify-content:center}
-.suggest-item.si-info:hover{background:transparent}
-.period-selects{display:flex;gap:8px}
+.logo h1 span{color:var(--acb)}
+.hbadge{font-size:12px;color:var(--t3);background:var(--card);padding:6px 14px;border-radius:20px;border:1px solid var(--brd)}
+
+/* Status bar */
+.status-bar{display:flex;align-items:center;gap:16px;padding:10px 0;font-size:12px;color:var(--t3);flex-wrap:wrap}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}
+.status-dot.ok{background:var(--grn)}
+.status-dot.err{background:var(--red)}
+.status-dot.loading{background:var(--ac);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.status-item{display:flex;align-items:center;gap:2px}
+
+.sp{background:var(--card);border:1px solid var(--brd);border-radius:var(--r);margin:16px 0;padding:28px;box-shadow:var(--sh)}
+.sp h2{font-size:15px;font-weight:600;color:var(--t2);margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.sp h2::before{content:'';width:3px;height:16px;background:var(--ac);border-radius:2px}
+.sg{display:grid;grid-template-columns:1fr auto auto;gap:16px;align-items:end}
+@media(max-width:768px){.sg{grid-template-columns:1fr}}
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg label{font-size:12px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
+.cia{display:flex;flex-direction:column;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;min-height:28px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--acd);border:1px solid rgba(59,130,246,.3);color:var(--acb);padding:4px 10px 4px 12px;border-radius:20px;font-size:13px;font-weight:500}
+.chip .rm{cursor:pointer;width:16px;height:16px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(59,130,246,.2);font-size:11px;transition:background .15s}
+.chip .rm:hover{background:rgba(239,68,68,.4);color:#fff}
+.iws{position:relative}
+input[type="text"],select{width:100%;padding:10px 14px;background:var(--inp);border:1px solid var(--brd);border-radius:var(--rs);color:var(--t1);font-size:14px;font-family:inherit;transition:border-color .2s,box-shadow .2s;outline:none}
+input[type="text"]:focus,select:focus{border-color:var(--brf);box-shadow:0 0 0 3px var(--acd)}
+input::placeholder{color:var(--t3)}
+.sdd{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card);border:1px solid var(--brd);border-radius:var(--rs);max-height:280px;overflow-y:auto;z-index:100;box-shadow:var(--sh)}
+.sdd.show{display:block}
+.si{padding:10px 14px;cursor:pointer;font-size:13px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(42,53,84,.5);transition:background .1s}
+.si:last-child{border-bottom:none}
+.si:hover{background:var(--card2)}
+.si .cn{font-weight:500}
+.si .sc{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--t3)}
+.si.inf{color:var(--t3);cursor:default;justify-content:center}
+.si.inf:hover{background:transparent}
+.ps{display:flex;gap:8px}
 select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235a6b8a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;min-width:100px}
-.btn{padding:10px 24px;border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{background:#2563eb;transform:translateY(-1px)}
-.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.history-bar{display:flex;align-items:center;gap:12px;padding:12px 0;overflow-x:auto;margin-bottom:8px}
-.history-bar-label{font-size:12px;color:var(--text-muted);white-space:nowrap;font-weight:500}
-.history-chip{display:inline-flex;align-items:center;gap:6px;background:var(--bg-card);border:1px solid var(--border);padding:6px 12px;border-radius:20px;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .15s}
-.history-chip:hover{border-color:var(--accent);background:var(--accent-dim)}
-.history-chip .hist-corps{font-weight:500;color:var(--text-primary)}
-.history-chip .hist-period{color:var(--text-muted);margin-left:4px}
-.loading-overlay{display:none;position:fixed;inset:0;background:rgba(10,14,23,.85);z-index:1000;justify-content:center;align-items:center;flex-direction:column;gap:16px}
-.loading-overlay.show{display:flex}
-.spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{font-size:14px;color:var(--text-secondary)}
-.results-area{margin:24px 0 48px}
-.results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px}
-.results-title{font-size:16px;font-weight:600}
-.results-meta{font-size:12px;color:var(--text-muted)}
-.view-toggle{display:inline-flex;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
-.view-toggle button{padding:8px 18px;background:none;border:none;color:var(--text-muted);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
-.view-toggle button.active{background:var(--accent);color:#fff}
-.table-container{overflow-x:auto;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.btn{padding:10px 24px;border:none;border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.btn-p{background:var(--ac);color:#fff}
+.btn-p:hover{background:#2563eb;transform:translateY(-1px)}
+.btn-p:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.hbar{display:flex;align-items:center;gap:12px;padding:10px 0;overflow-x:auto}
+.hbar-l{font-size:12px;color:var(--t3);white-space:nowrap;font-weight:500}
+.hc{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--brd);padding:6px 12px;border-radius:20px;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .15s}
+.hc:hover{border-color:var(--ac);background:var(--acd)}
+.hc .hcn{font-weight:500;color:var(--t1)}
+.hc .hcp{color:var(--t3);margin-left:4px}
+.lo{display:none;position:fixed;inset:0;background:rgba(10,14,23,.85);z-index:1000;justify-content:center;align-items:center;flex-direction:column;gap:16px}
+.lo.show{display:flex}
+.spin{width:48px;height:48px;border:3px solid var(--brd);border-top-color:var(--ac);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.lt{font-size:14px;color:var(--t2)}
+.ra{margin:24px 0 48px}
+.rh{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px}
+.rt{font-size:16px;font-weight:600}
+.rm2{font-size:12px;color:var(--t3)}
+.vt{display:inline-flex;background:var(--inp);border:1px solid var(--brd);border-radius:var(--rs);overflow:hidden}
+.vt button{padding:8px 18px;background:none;border:none;color:var(--t3);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.vt button.active{background:var(--ac);color:#fff}
+.tc{overflow-x:auto;background:var(--card);border:1px solid var(--brd);border-radius:var(--r);box-shadow:var(--sh)}
 table{width:100%;border-collapse:collapse;font-size:13px}
-thead th{background:var(--bg-secondary);padding:14px 16px;text-align:right;font-weight:600;font-size:13px;color:var(--text-secondary);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:10;white-space:nowrap}
-thead th:first-child{text-align:left;position:sticky;left:0;z-index:11;background:var(--bg-secondary);min-width:180px}
+thead th{background:var(--bg2);padding:14px 16px;text-align:right;font-weight:600;font-size:13px;color:var(--t2);border-bottom:2px solid var(--brd);position:sticky;top:0;z-index:10;white-space:nowrap}
+thead th:first-child{text-align:left;position:sticky;left:0;z-index:11;background:var(--bg2);min-width:180px}
 tbody td{padding:11px 16px;text-align:right;border-bottom:1px solid rgba(42,53,84,.4);font-family:'JetBrains Mono',monospace;font-size:13px;white-space:nowrap}
-tbody td:first-child{text-align:left;font-family:'Noto Sans KR',sans-serif;font-weight:500;font-size:13px;position:sticky;left:0;background:var(--bg-card);z-index:5}
-tbody tr:hover td{background:var(--bg-card-hover)}
-tbody tr:hover td:first-child{background:var(--bg-card-hover)}
-.section-row td{background:rgba(59,130,246,.08)!important;font-weight:700!important;font-family:'Noto Sans KR',sans-serif!important;font-size:13px!important;color:var(--accent-bright);border-top:2px solid rgba(59,130,246,.2)}
-.negative{color:var(--red)}
-.positive{color:var(--green)}
-.report-links{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px}
-.report-link{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--accent-bright);text-decoration:none;font-size:13px;font-weight:500;transition:all .15s}
-.report-link:hover{background:var(--accent-dim);border-color:var(--accent)}
-.report-link svg{width:14px;height:14px}
-.empty-state{text-align:center;padding:80px 24px;color:var(--text-muted)}
-.empty-state-icon{font-size:48px;margin-bottom:16px;opacity:.3}
-.empty-state h3{font-size:18px;font-weight:600;color:var(--text-secondary);margin-bottom:8px}
-.empty-state p{font-size:14px}
-.error-banner{display:none;background:var(--red-dim);border:1px solid rgba(239,68,68,.3);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:16px;color:var(--red);font-size:13px}
-.error-banner.show{display:block}
+tbody td:first-child{text-align:left;font-family:'Noto Sans KR',sans-serif;font-weight:500;font-size:13px;position:sticky;left:0;background:var(--card);z-index:5}
+tbody tr:hover td{background:var(--card2)}
+tbody tr:hover td:first-child{background:var(--card2)}
+.sr td{background:rgba(59,130,246,.08)!important;font-weight:700!important;font-family:'Noto Sans KR',sans-serif!important;font-size:13px!important;color:var(--acb);border-top:2px solid rgba(59,130,246,.2)}
+.neg{color:var(--red)}.pos{color:var(--grn)}
+.rls{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px}
+.rl{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--card);border:1px solid var(--brd);border-radius:var(--rs);color:var(--acb);text-decoration:none;font-size:13px;font-weight:500;transition:all .15s}
+.rl:hover{background:var(--acd);border-color:var(--ac)}
+.rl svg{width:14px;height:14px}
+.es{text-align:center;padding:80px 24px;color:var(--t3)}
+.es-i{font-size:48px;margin-bottom:16px;opacity:.3}
+.es h3{font-size:18px;font-weight:600;color:var(--t2);margin-bottom:8px}
+.es p{font-size:14px}
+.eb{display:none;background:var(--redd);border:1px solid rgba(239,68,68,.3);border-radius:var(--rs);padding:12px 16px;margin-bottom:16px;color:var(--red);font-size:13px}
+.eb.show{display:block}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-footer{padding:24px 0;border-top:1px solid var(--border);text-align:center;font-size:12px;color:var(--text-muted)}
-footer a{color:var(--accent-bright);text-decoration:none}
+::-webkit-scrollbar-thumb{background:var(--brd);border-radius:3px}
+footer{padding:24px 0;border-top:1px solid var(--brd);text-align:center;font-size:12px;color:var(--t3)}
+footer a{color:var(--acb);text-decoration:none}
 </style>
 </head>
 <body>
-<header><div class="container"><div class="logo"><div class="logo-icon">D</div><h1>DART <span>공시 비교</span></h1></div><div class="header-badge">OpenDART API 기반 재무제표 통합 조회</div></div></header>
-<main class="container">
-<div class="history-bar" id="historyBar" style="display:none"><span class="history-bar-label">최근 조회 ▸</span><div id="historyChips"></div></div>
-<div class="search-panel"><h2>기업 검색 및 조회</h2><div class="search-grid"><div class="field-group"><label>기업명 / 종목코드 (최대 5개)</label><div class="company-input-area"><div class="company-chips" id="companyChips"></div><div class="input-with-suggest"><input type="text" id="companyInput" placeholder="기업명 또는 종목코드 입력 (예: 안랩, 005930)" autocomplete="off"/><div class="suggest-dropdown" id="suggestDropdown"></div></div></div></div><div class="field-group"><label>조회 기간</label><div class="period-selects"><select id="yearSelect"></select><select id="quarterSelect"><option value="11013">1분기</option><option value="11012">반기</option><option value="11014">3분기</option><option value="11011">사업보고서</option></select></div></div><div class="field-group"><label>&nbsp;</label><button class="btn btn-primary" id="searchBtn" disabled><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>조회</button></div></div></div>
-<div class="error-banner" id="errorBanner"></div>
-<div class="results-area" id="resultsArea"><div class="empty-state"><div class="empty-state-icon">📊</div><h3>기업을 선택하고 조회하세요</h3><p>최대 5개 기업의 재무제표를 한눈에 비교할 수 있습니다</p></div></div>
+<header><div class="ct"><div class="logo"><div class="logo-i">D</div><h1>DART <span>공시 비교</span></h1></div><div class="hbadge">OpenDART API 기반 재무제표 통합 조회</div></div></header>
+<main class="ct">
+<div class="status-bar" id="statusBar">
+  <div class="status-item" id="stCorps"><span class="status-dot loading"></span>기업 목록: 로딩 중</div>
+  <div class="status-item" id="stApi"><span class="status-dot loading"></span>DART API: 확인 중</div>
+  <div class="status-item" id="stTime"></div>
+</div>
+<div class="hbar" id="hBar" style="display:none"><span class="hbar-l">최근 조회 ▸</span><div id="hChips"></div></div>
+<div class="sp"><h2>기업 검색 및 조회</h2><div class="sg"><div class="fg"><label>기업명 / 종목코드 (최대 5개)</label><div class="cia"><div class="chips" id="cChips"></div><div class="iws"><input type="text" id="cInput" placeholder="기업명 또는 종목코드 입력 (예: 안랩, 시큐아이, 005930)" autocomplete="off"/><div class="sdd" id="sDD"></div></div></div></div><div class="fg"><label>조회 기간</label><div class="ps"><select id="ySel"></select><select id="qSel"><option value="11013">1분기</option><option value="11012">반기</option><option value="11014">3분기</option><option value="11011">사업보고서</option></select></div></div><div class="fg"><label>&nbsp;</label><button class="btn btn-p" id="sBtn" disabled><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>조회</button></div></div></div>
+<div class="eb" id="eB"></div>
+<div class="ra" id="rA"><div class="es"><div class="es-i">📊</div><h3>기업을 선택하고 조회하세요</h3><p>최대 5개 기업의 재무제표를 한눈에 비교할 수 있습니다</p></div></div>
 </main>
-<footer><div class="container">데이터 출처: <a href="https://opendart.fss.or.kr" target="_blank">금융감독원 전자공시시스템 OpenDART</a> · 본 서비스는 투자 참고용이며, 투자 판단의 책임은 이용자에게 있습니다.</div></footer>
-<div class="loading-overlay" id="loading"><div class="spinner"></div><div class="loading-text" id="loadingText">로딩 중...</div></div>
+<footer><div class="ct">데이터 출처: <a href="https://opendart.fss.or.kr" target="_blank">금융감독원 전자공시시스템 OpenDART</a> · 본 서비스는 투자 참고용이며, 투자 판단의 책임은 이용자에게 있습니다.</div></footer>
+<div class="lo" id="lO"><div class="spin"></div><div class="lt" id="lT">로딩 중...</div></div>
 <script>
-var API_BASE="/api",selectedCorps=[],searchHistory=[],currentView="key";
-var MAJOR_CORPS=[{c:"00126380",n:"삼성전자",s:"005930"},{c:"00164779",n:"SK하이닉스",s:"000660"},{c:"00260985",n:"LG에너지솔루션",s:"373220"},{c:"00104299",n:"삼성바이오로직스",s:"207940"},{c:"00401731",n:"현대자동차",s:"005380"},{c:"00145765",n:"기아",s:"000270"},{c:"00356361",n:"셀트리온",s:"068270"},{c:"00258801",n:"KB금융",s:"105560"},{c:"00126186",n:"신한지주",s:"055550"},{c:"00382199",n:"NAVER",s:"035420"},{c:"00258999",n:"카카오",s:"035720"},{c:"00164742",n:"삼성SDI",s:"006400"},{c:"00232089",n:"LG화학",s:"051910"},{c:"00107907",n:"포스코홀딩스",s:"005490"},{c:"00401614",n:"LG전자",s:"066570"},{c:"00156091",n:"SK텔레콤",s:"017670"},{c:"00252481",n:"KT",s:"030200"},{c:"00159221",n:"하나금융지주",s:"086790"},{c:"00187198",n:"한화에어로스페이스",s:"012450"},{c:"00126181",n:"삼성화재",s:"000810"},{c:"00293886",n:"엔씨소프트",s:"036570"},{c:"00161941",n:"SK",s:"034730"},{c:"00164618",n:"LG",s:"003550"},{c:"00205765",n:"한국전력",s:"015760"},{c:"00117554",n:"HD현대중공업",s:"329180"},{c:"00155319",n:"한국항공우주",s:"047810"},{c:"00126203",n:"현대건설",s:"000720"},{c:"00107605",n:"CJ제일제당",s:"097950"},{c:"00113961",n:"아모레퍼시픽",s:"090430"},{c:"00145020",n:"대한항공",s:"003490"},{c:"00140578",n:"LG이노텍",s:"011070"},{c:"00118306",n:"한미약품",s:"128940"}].map(function(x){return{corp_code:x.c,corp_name:x.n,stock_code:x.s}});
+var AB="/api",SC=[],SH=[],CV="key",CL=[];
+var G=function(i){return document.getElementById(i)};
+var cI=G("cInput"),sD=G("sDD"),cC=G("cChips"),yS=G("ySel"),qS=G("qSel"),sB=G("sBtn"),rA=G("rA"),eB=G("eB"),lO=G("lO"),lT=G("lT"),hB=G("hBar"),hC=G("hChips");
+var stCorps=G("stCorps"),stApi=G("stApi"),stTime=G("stTime");
 
-var G=function(id){return document.getElementById(id)};
-var companyInput=G("companyInput"),suggestDD=G("suggestDropdown"),companyChips=G("companyChips"),yearSelect=G("yearSelect"),quarterSelect=G("quarterSelect"),searchBtn=G("searchBtn"),resultsArea=G("resultsArea"),errorBanner=G("errorBanner"),loadingEl=G("loading"),loadingText=G("loadingText"),historyBar=G("historyBar"),historyChipsEl=G("historyChips");
-
+// ===== Init =====
 (function(){
   var y=new Date().getFullYear();
-  for(var i=y;i>=2015;i--){var o=document.createElement("option");o.value=i;o.textContent=i+"년";yearSelect.appendChild(o)}
-  loadHistory();
+  for(var i=y;i>=2015;i--){var o=document.createElement("option");o.value=i;o.textContent=i+"년";yS.appendChild(o)}
+  loadHist();
+  loadCorps();
   var dt=null;
-  companyInput.addEventListener("input",function(){clearTimeout(dt);var q=companyInput.value.trim();if(q.length<1){hideDD();return}dt=setTimeout(function(){doSearch(q)},250)});
-  companyInput.addEventListener("keydown",function(e){if(e.key==="Escape")hideDD();if(e.key==="Enter"){var f=suggestDD.querySelector(".suggest-item:not(.si-info)");if(f)f.click()}});
-  document.addEventListener("click",function(e){if(!e.target.closest(".input-with-suggest"))hideDD()});
-  searchBtn.addEventListener("click",performSearch);
+  cI.addEventListener("input",function(){clearTimeout(dt);var q=cI.value.trim();if(q.length<1){hDD();return}dt=setTimeout(function(){doSrch(q)},150)});
+  cI.addEventListener("keydown",function(e){if(e.key==="Escape")hDD();if(e.key==="Enter"){var f=sD.querySelector(".si:not(.inf)");if(f)f.click()}});
+  document.addEventListener("click",function(e){if(!e.target.closest(".iws"))hDD()});
+  sB.addEventListener("click",doFetch);
 })();
 
-// ========== Search ==========
-var searchSeq=0;
-function doSearch(query){
-  var q=query.toLowerCase();
-  var local=MAJOR_CORPS.filter(function(c){
-    var nm=c.corp_name.toLowerCase().indexOf(q)!==-1;
-    var cd=c.stock_code&&c.stock_code.indexOf(q)!==-1;
-    var sel=selectedCorps.some(function(s){return s.corp_code===c.corp_code});
+// ===== Status Monitor =====
+function setSt(el,ok,text){el.innerHTML='<span class="status-dot '+(ok===true?'ok':ok===false?'err':'loading')+'"></span>'+text}
+function updateTime(){stTime.textContent="⏱ "+new Date().toLocaleTimeString("ko-KR")}
+setInterval(updateTime,1000);updateTime();
+
+// ===== Load Corps JSON =====
+function loadCorps(){
+  setSt(stCorps,null,"기업 목록: 로딩 중...");
+  fetch("/corps.json").then(function(r){return r.json()}).then(function(data){
+    CL=data.map(function(c){return{corp_code:c[0],corp_name:c[1],stock_code:c[2]}});
+    setSt(stCorps,true,"기업 목록: "+CL.length+"개 로드됨");
+    checkApi();
+  }).catch(function(e){
+    setSt(stCorps,false,"기업 목록: 로드 실패");
+  });
+}
+
+function checkApi(){
+  setSt(stApi,null,"DART API: 확인 중...");
+  fetch(AB+"/fnlttSinglAcnt.json?corp_code=00126380&bsns_year=2024&reprt_code=11011").then(function(r){return r.json()}).then(function(j){
+    if(j.status==="000") setSt(stApi,true,"DART API: 정상");
+    else setSt(stApi,false,"DART API: 오류 ("+j.status+")");
+  }).catch(function(){setSt(stApi,false,"DART API: 연결 실패")});
+}
+
+// ===== Search =====
+function doSrch(q){
+  var ql=q.toLowerCase();
+  var res=CL.filter(function(c){
+    var nm=c.corp_name.toLowerCase().indexOf(ql)!==-1;
+    var cd=c.stock_code&&c.stock_code.indexOf(ql)!==-1;
+    var sel=SC.some(function(s){return s.corp_code===c.corp_code});
     return(nm||cd)&&!sel;
-  }).slice(0,8);
-
-  if(local.length>0) renderDD(local);
-
-  if(query.length>=2){
-    searchSeq++;
-    var mySeq=searchSeq;
-    if(local.length===0){suggestDD.innerHTML='<div class="suggest-item si-info">DART에서 검색 중...</div>';suggestDD.classList.add("show")}
-
-    fetch(API_BASE+"/list.json?corp_name="+encodeURIComponent(query)+"&page_count=20&pblntf_ty=A").then(function(r){return r.json()}).then(function(json){
-      if(mySeq!==searchSeq)return;
-      if(json.status!=="000"||!json.list){if(local.length===0){suggestDD.innerHTML='<div class="suggest-item si-info">"'+query+'" 검색 결과가 없습니다</div>';suggestDD.classList.add("show")}return}
-      var seen={};var api=[];
-      local.forEach(function(c){seen[c.corp_code]=true});
-      selectedCorps.forEach(function(c){seen[c.corp_code]=true});
-      json.list.forEach(function(it){
-        if(!seen[it.corp_code]&&it.stock_code){seen[it.corp_code]=true;api.push({corp_code:it.corp_code,corp_name:it.corp_name,stock_code:it.stock_code})}
-      });
-      var combined=local.concat(api).slice(0,12);
-      if(combined.length>0)renderDD(combined);
-      else{suggestDD.innerHTML='<div class="suggest-item si-info">"'+query+'" 검색 결과가 없습니다</div>';suggestDD.classList.add("show")}
-    }).catch(function(){});
-  } else if(local.length===0){
-    suggestDD.innerHTML='<div class="suggest-item si-info">2글자 이상 입력해주세요</div>';suggestDD.classList.add("show");
-  }
+  }).slice(0,12);
+  if(res.length>0)rDD(res);
+  else{sD.innerHTML='<div class="si inf">"'+q+'" 검색 결과가 없습니다. 목록에 없는 기업일 수 있습니다.</div>';sD.classList.add("show")}
 }
 
-function renderDD(list){
-  suggestDD.innerHTML=list.map(function(c){return'<div class="suggest-item" data-c="'+c.corp_code+'" data-n="'+c.corp_name+'" data-s="'+(c.stock_code||"")+'"><span class="corp-name">'+c.corp_name+'</span><span class="stock-code">'+(c.stock_code||"-")+'</span></div>'}).join("");
-  suggestDD.querySelectorAll(".suggest-item").forEach(function(el){el.addEventListener("click",function(){addCorp({corp_code:el.dataset.c,corp_name:el.dataset.n,stock_code:el.dataset.s});companyInput.value="";hideDD()})});
-  suggestDD.classList.add("show");
+function rDD(list){
+  sD.innerHTML=list.map(function(c){return'<div class="si" data-c="'+c.corp_code+'" data-n="'+c.corp_name+'" data-s="'+(c.stock_code||"")+'"><span class="cn">'+c.corp_name+'</span><span class="sc">'+(c.stock_code||"-")+'</span></div>'}).join("");
+  sD.querySelectorAll(".si").forEach(function(el){el.addEventListener("click",function(){addC({corp_code:el.dataset.c,corp_name:el.dataset.n,stock_code:el.dataset.s});cI.value="";hDD()})});
+  sD.classList.add("show");
 }
-function hideDD(){suggestDD.classList.remove("show")}
+function hDD(){sD.classList.remove("show")}
 
-// ========== Chips ==========
-function addCorp(c){if(selectedCorps.length>=5){showErr("최대 5개 기업까지 선택 가능합니다.");return}if(selectedCorps.some(function(x){return x.corp_code===c.corp_code}))return;selectedCorps.push(c);drawChips();searchBtn.disabled=false}
-function removeCorp(code){selectedCorps=selectedCorps.filter(function(c){return c.corp_code!==code});drawChips();searchBtn.disabled=selectedCorps.length===0}
-window.removeCorp=removeCorp;
-function drawChips(){companyChips.innerHTML=selectedCorps.map(function(c){return'<span class="chip">'+c.corp_name+' <span class="remove" onclick="removeCorp(\''+c.corp_code+'\')">✕</span></span>'}).join("")}
+// ===== Chips =====
+function addC(c){if(SC.length>=5){shErr("최대 5개 기업까지 선택 가능합니다.");return}if(SC.some(function(x){return x.corp_code===c.corp_code}))return;SC.push(c);drC();sB.disabled=false}
+function rmC(code){SC=SC.filter(function(c){return c.corp_code!==code});drC();sB.disabled=SC.length===0}
+window.rmC=rmC;
+function drC(){cC.innerHTML=SC.map(function(c){return'<span class="chip">'+c.corp_name+' <span class="rm" onclick="rmC(\''+c.corp_code+'\')">✕</span></span>'}).join("")}
 
-// ========== Number Formatting ==========
-function fmtKr(s){
+// ===== Format =====
+function fK(s){
   if(!s||s==="")return"-";
-  var n=parseInt(s.replace(/,/g,""),10);
-  if(isNaN(n))return s;
-  var neg=n<0,a=Math.abs(n),parts=[];
-  var jo=Math.floor(a/1e12),r=a%1e12;
-  var eok=Math.floor(r/1e8),rr=r%1e8;
-  if(jo>0)parts.push(jo.toLocaleString("ko-KR")+"조");
-  if(eok>0)parts.push(eok.toLocaleString("ko-KR")+"억");
-  if(parts.length===0){
-    var man=Math.floor(a/1e4);
-    if(man>0)parts.push(man.toLocaleString("ko-KR")+"만 원");
-    else parts.push(a.toLocaleString("ko-KR")+" 원");
-  } else { parts[parts.length-1]+=" 원"; }
-  return neg?"-"+parts.join(" "):parts.join(" ");
+  var n=parseInt(s.replace(/,/g,""),10);if(isNaN(n))return s;
+  var neg=n<0,a=Math.abs(n),p=[];
+  var jo=Math.floor(a/1e12),eok=Math.floor((a%1e12)/1e8);
+  if(jo>0)p.push(jo.toLocaleString("ko-KR")+"조");
+  if(eok>0)p.push(eok.toLocaleString("ko-KR")+"억");
+  if(p.length===0){var man=Math.floor(a/1e4);if(man>0)p.push(man.toLocaleString("ko-KR")+"만 원");else p.push(a.toLocaleString("ko-KR")+" 원")}
+  else p[p.length-1]+=" 원";
+  return neg?"-"+p.join(" "):p.join(" ");
 }
+function mc(v){var f=fK(v);var ng=v&&v.replace(/,/g,"").charAt(0)==="-";return'<td class="'+(ng?"neg":"")+'">'+f+"</td>"}
 
-// ========== Fetch ==========
-function performSearch(){
-  if(!selectedCorps.length)return;
-  var year=yearSelect.value,rc=quarterSelect.value,ql=quarterSelect.options[quarterSelect.selectedIndex].text;
-  showLoad("재무 데이터를 불러오는 중...");hideErr();
-  var results=[],idx=0;
-  function next(){
-    if(idx>=selectedCorps.length){currentView="key";renderResults(results,year,ql);savHist(selectedCorps.map(function(c){return{corp_code:c.corp_code,corp_name:c.corp_name,stock_code:c.stock_code}}),year,rc,ql);hideLoad();return}
-    var corp=selectedCorps[idx];
-    loadingText.textContent=corp.corp_name+" 조회 중... ("+(idx+1)+"/"+selectedCorps.length+")";
-    fetchFin(corp.corp_code,year,rc,"OFS").then(function(d){results.push({corp:corp,data:d,reprtCode:rc});idx++;next()}).catch(function(){results.push({corp:corp,data:{items:[],type:"empty"},reprtCode:rc});idx++;next()});
+// ===== Fetch =====
+function doFetch(){
+  if(!SC.length)return;
+  var yr=yS.value,rc=qS.value,ql=qS.options[qS.selectedIndex].text;
+  shLd("재무 데이터를 불러오는 중...");hdErr();
+  var res=[],idx=0;
+  function nx(){
+    if(idx>=SC.length){CV="key";rnR(res,yr,ql);svH(SC.map(function(c){return{corp_code:c.corp_code,corp_name:c.corp_name,stock_code:c.stock_code}}),yr,rc,ql);hdLd();return}
+    var c=SC[idx];lT.textContent=c.corp_name+" 조회 중... ("+(idx+1)+"/"+SC.length+")";
+    fFin(c.corp_code,yr,rc,"OFS").then(function(d){res.push({corp:c,data:d,rc:rc});idx++;nx()}).catch(function(){res.push({corp:c,data:{items:[],type:"empty"},rc:rc});idx++;nx()});
   }
-  next();
+  nx();
 }
-
-function fetchFin(cc,yr,rc,fs){
-  return fetch(API_BASE+"/fnlttSinglAcntAll.json?corp_code="+cc+"&bsns_year="+yr+"&reprt_code="+rc+"&fs_div="+fs).then(function(r){return r.json()}).then(function(j){
-    if(j.status==="013"){return fetch(API_BASE+"/fnlttSinglAcnt.json?corp_code="+cc+"&bsns_year="+yr+"&reprt_code="+rc).then(function(r2){return r2.json()}).then(function(j2){return j2.status==="000"&&j2.list?{items:j2.list,type:"summary"}:{items:[],type:"empty"}})}
+function fFin(cc,yr,rc,fs){
+  return fetch(AB+"/fnlttSinglAcntAll.json?corp_code="+cc+"&bsns_year="+yr+"&reprt_code="+rc+"&fs_div="+fs).then(function(r){return r.json()}).then(function(j){
+    if(j.status==="013"){return fetch(AB+"/fnlttSinglAcnt.json?corp_code="+cc+"&bsns_year="+yr+"&reprt_code="+rc).then(function(r2){return r2.json()}).then(function(j2){return j2.status==="000"&&j2.list?{items:j2.list,type:"summary"}:{items:[],type:"empty"}})}
     if(j.status!=="000")throw new Error(j.message||"오류");
     return{items:j.list||[],type:"full"};
   });
 }
 
-// ========== Render ==========
-var KIS=["매출액","수익(매출액)","영업수익","매출","매출원가","매출총이익","판매비와관리비","판매비와 관리비","영업이익","영업이익(손실)","금융수익","금융이익","금융비용","금융원가","법인세비용차감전순이익","법인세비용차감전순이익(손실)","법인세차감전 순이익","법인세비용","당기순이익","당기순이익(손실)","기본주당이익","기본주당이익(손실)"];
-var KBS=["자산총계","유동자산","비유동자산","부채총계","유동부채","비유동부채","자본총계","자본금","이익잉여금"];
-var KSGA=["급여","퇴직급여","복리후생비","감가상각비","연구개발비","광고선전비"];
-var SJM={BS:"재무상태표",IS:"손익계산서",CIS:"포괄손익계산서",CF:"현금흐름표",SCE:"자본변동표"};
+// ===== Render =====
+var KI=["매출액","수익(매출액)","영업수익","매출","매출원가","매출총이익","판매비와관리비","판매비와 관리비","영업이익","영업이익(손실)","금융수익","금융이익","금융비용","금융원가","법인세비용차감전순이익","법인세비용차감전순이익(손실)","법인세차감전 순이익","법인세비용","당기순이익","당기순이익(손실)","기본주당이익","기본주당이익(손실)"];
+var KB=["자산총계","유동자산","비유동자산","부채총계","유동부채","비유동부채","자본총계","자본금","이익잉여금"];
+var KS=["급여","퇴직급여","복리후생비","감가상각비","연구개발비","광고선전비"];
+var SM={BS:"재무상태표",IS:"손익계산서",CIS:"포괄손익계산서",CF:"현금흐름표",SCE:"자본변동표"};
 
-function gAmt(item,rc){if(item.sj_div==="BS")return item.thstrm_amount||"";return rc!=="11011"?(item.thstrm_add_amount||item.thstrm_amount||""):(item.thstrm_amount||"")}
-function mc(v){var f=fmtKr(v);var neg=v&&v.replace(/,/g,"").charAt(0)==="-";return'<td class="'+(neg?"negative":"")+'">'+f+"</td>"}
+function gA(it,rc){if(it.sj_div==="BS")return it.thstrm_amount||"";return rc!=="11011"?(it.thstrm_add_amount||it.thstrm_amount||""):(it.thstrm_amount||"")}
 
-function renderResults(results,year,ql){
-  var vr=results.filter(function(r){return r.data.items.length>0});
-  if(!vr.length){resultsArea.innerHTML='<div class="empty-state"><div class="empty-state-icon">🔍</div><h3>조회 결과가 없습니다</h3><p>'+year+'년 '+ql+' 데이터를 찾을 수 없습니다.</p></div>';return}
-  resultsArea.innerHTML='<div class="results-header"><div><div class="results-title">'+year+'년 '+ql+' 재무제표 비교</div><div class="results-meta">단일(별도) 재무제표 기준 · '+vr.length+'개 기업</div></div><div class="view-toggle" id="vt"><button class="'+(currentView==="key"?"active":"")+'" data-v="key">주요 지표</button><button class="'+(currentView==="full"?"active":"")+'" data-v="full">전체 재무제표</button></div></div><div id="ta"></div><div class="report-links" id="rl"></div>';
-  document.querySelectorAll("#vt button").forEach(function(b){b.addEventListener("click",function(){currentView=b.dataset.v;document.querySelectorAll("#vt button").forEach(function(x){x.classList.remove("active")});b.classList.add("active");rT(vr)})});
+function rnR(rs,yr,ql){
+  var vr=rs.filter(function(r){return r.data.items.length>0});
+  if(!vr.length){rA.innerHTML='<div class="es"><div class="es-i">🔍</div><h3>조회 결과가 없습니다</h3><p>'+yr+'년 '+ql+' 데이터를 찾을 수 없습니다.</p></div>';return}
+  rA.innerHTML='<div class="rh"><div><div class="rt">'+yr+'년 '+ql+' 재무제표 비교</div><div class="rm2">단일(별도) 재무제표 기준 · '+vr.length+'개 기업</div></div><div class="vt" id="vt"><button class="'+(CV==="key"?"active":"")+'" data-v="key">주요 지표</button><button class="'+(CV==="full"?"active":"")+'" data-v="full">전체 재무제표</button></div></div><div id="ta"></div><div class="rls" id="rl"></div>';
+  document.querySelectorAll("#vt button").forEach(function(b){b.addEventListener("click",function(){CV=b.dataset.v;document.querySelectorAll("#vt button").forEach(function(x){x.classList.remove("active")});b.classList.add("active");rT(vr)})});
   rT(vr);rRL(vr);
 }
 
-function rT(rs){var ta=G("ta");if(currentView==="key")rKey(rs,ta);else rFull(rs,ta)}
+function rT(rs){var t=G("ta");if(CV==="key")rK(rs,t);else rF(rs,t)}
 
-function rKey(rs,c){
-  var hd=rs.map(function(r){return"<th>"+r.corp.corp_name+"</th>"}).join(""),cs=rs.length+1,rows="";
-  rows+='<tr class="section-row"><td colspan="'+cs+'">📈 손익계산서 (누적)</td></tr>';
-  KIS.forEach(function(nm){var rd=rs.map(function(r){var it=r.data.items.find(function(i){return(i.sj_div==="IS"||i.sj_div==="CIS")&&i.account_nm===nm});return it?gAmt(it,r.reprtCode):null});if(rd.some(function(v){return v!==null&&v!==""})){rows+="<tr><td>"+nm+"</td>"+rd.map(function(v){return mc(v)}).join("")+"</tr>"}});
+function rK(rs,c){
+  var hd=rs.map(function(r){return"<th>"+r.corp.corp_name+"</th>"}).join(""),cs=rs.length+1,rw="";
+  rw+='<tr class="sr"><td colspan="'+cs+'">📈 손익계산서 (누적)</td></tr>';
+  KI.forEach(function(nm){var rd=rs.map(function(r){var it=r.data.items.find(function(i){return(i.sj_div==="IS"||i.sj_div==="CIS")&&i.account_nm===nm});return it?gA(it,r.rc):null});if(rd.some(function(v){return v!==null&&v!==""})){rw+="<tr><td>"+nm+"</td>"+rd.map(function(v){return mc(v)}).join("")+"</tr>"}});
 
-  var hasSGA=KSGA.some(function(nm){return rs.some(function(r){return r.data.items.some(function(i){return i.account_nm===nm&&(i.sj_div==="IS"||i.sj_div==="CIS")})})});
-  if(hasSGA){rows+='<tr class="section-row"><td colspan="'+cs+'">📋 판관비 세부 (누적)</td></tr>';KSGA.forEach(function(nm){var rd=rs.map(function(r){var it=r.data.items.find(function(i){return(i.sj_div==="IS"||i.sj_div==="CIS")&&i.account_nm===nm});return it?gAmt(it,r.reprtCode):null});if(rd.some(function(v){return v!==null&&v!==""})){rows+="<tr><td>&nbsp;&nbsp;"+nm+"</td>"+rd.map(function(v){return mc(v)}).join("")+"</tr>"}})}
+  var hasSGA=KS.some(function(nm){return rs.some(function(r){return r.data.items.some(function(i){return i.account_nm===nm&&(i.sj_div==="IS"||i.sj_div==="CIS")})})});
+  if(hasSGA){rw+='<tr class="sr"><td colspan="'+cs+'">📋 판관비 세부 (누적)</td></tr>';KS.forEach(function(nm){var rd=rs.map(function(r){var it=r.data.items.find(function(i){return(i.sj_div==="IS"||i.sj_div==="CIS")&&i.account_nm===nm});return it?gA(it,r.rc):null});if(rd.some(function(v){return v!==null&&v!==""})){rw+="<tr><td>&nbsp;&nbsp;"+nm+"</td>"+rd.map(function(v){return mc(v)}).join("")+"</tr>"}})}
 
-  rows+='<tr class="section-row"><td colspan="'+cs+'">🏦 재무상태표</td></tr>';
-  KBS.forEach(function(nm){var rd=rs.map(function(r){var it=r.data.items.find(function(i){return i.sj_div==="BS"&&i.account_nm===nm});return it?(it.thstrm_amount||""):null});if(rd.some(function(v){return v!==null&&v!==""})){rows+="<tr><td>"+nm+"</td>"+rd.map(function(v){return mc(v)}).join("")+"</tr>"}});
+  rw+='<tr class="sr"><td colspan="'+cs+'">🏦 재무상태표</td></tr>';
+  KB.forEach(function(nm){var rd=rs.map(function(r){var it=r.data.items.find(function(i){return i.sj_div==="BS"&&i.account_nm===nm});return it?(it.thstrm_amount||""):null});if(rd.some(function(v){return v!==null&&v!==""})){rw+="<tr><td>"+nm+"</td>"+rd.map(function(v){return mc(v)}).join("")+"</tr>"}});
 
-  rows+='<tr class="section-row"><td colspan="'+cs+'">📐 수익성 지표</td></tr>';
-  rows+="<tr><td>영업이익률</td>"+rs.map(function(r){var rv=fA(r,["매출액","수익(매출액)","영업수익"],["IS","CIS"]),op=fA(r,["영업이익","영업이익(손실)"],["IS","CIS"]);if(rv&&op){var m=(op/rv*100).toFixed(1);return'<td class="'+(m<0?"negative":"positive")+'">'+m+"%</td>"}return"<td>-</td>"}).join("")+"</tr>";
-  rows+="<tr><td>순이익률</td>"+rs.map(function(r){var rv=fA(r,["매출액","수익(매출액)","영업수익"],["IS","CIS"]),ni=fA(r,["당기순이익","당기순이익(손실)"],["IS","CIS"]);if(rv&&ni){var m=(ni/rv*100).toFixed(1);return'<td class="'+(m<0?"negative":"positive")+'">'+m+"%</td>"}return"<td>-</td>"}).join("")+"</tr>";
-  rows+="<tr><td>부채비율</td>"+rs.map(function(r){var d=fB(r,["부채총계"]),e=fB(r,["자본총계"]);if(d&&e&&e!==0)return"<td>"+(d/e*100).toFixed(1)+"%</td>";return"<td>-</td>"}).join("")+"</tr>";
-
-  c.innerHTML='<div class="table-container"><table><thead><tr><th>항목</th>'+hd+"</tr></thead><tbody>"+rows+"</tbody></table></div>";
+  rw+='<tr class="sr"><td colspan="'+cs+'">📐 수익성 지표</td></tr>';
+  rw+="<tr><td>영업이익률</td>"+rs.map(function(r){var rv=fAm(r,["매출액","수익(매출액)","영업수익"],["IS","CIS"]),op=fAm(r,["영업이익","영업이익(손실)"],["IS","CIS"]);if(rv&&op){var m=(op/rv*100).toFixed(1);return'<td class="'+(m<0?"neg":"pos")+'">'+m+"%</td>"}return"<td>-</td>"}).join("")+"</tr>";
+  rw+="<tr><td>순이익률</td>"+rs.map(function(r){var rv=fAm(r,["매출액","수익(매출액)","영업수익"],["IS","CIS"]),ni=fAm(r,["당기순이익","당기순이익(손실)"],["IS","CIS"]);if(rv&&ni){var m=(ni/rv*100).toFixed(1);return'<td class="'+(m<0?"neg":"pos")+'">'+m+"%</td>"}return"<td>-</td>"}).join("")+"</tr>";
+  rw+="<tr><td>부채비율</td>"+rs.map(function(r){var d=fBS(r,["부채총계"]),e=fBS(r,["자본총계"]);if(d&&e&&e!==0)return"<td>"+(d/e*100).toFixed(1)+"%</td>";return"<td>-</td>"}).join("")+"</tr>";
+  c.innerHTML='<div class="tc"><table><thead><tr><th>항목</th>'+hd+"</tr></thead><tbody>"+rw+"</tbody></table></div>";
 }
 
-function fA(r,names,divs){for(var i=0;i<names.length;i++){var it=r.data.items.find(function(x){return divs.indexOf(x.sj_div)!==-1&&x.account_nm===names[i]});if(it){var v=gAmt(it,r.reprtCode);if(v)return parseInt(v.replace(/,/g,""),10)}}return null}
-function fB(r,names){for(var i=0;i<names.length;i++){var it=r.data.items.find(function(x){return x.sj_div==="BS"&&x.account_nm===names[i]});if(it&&it.thstrm_amount)return parseInt(it.thstrm_amount.replace(/,/g,""),10)}return null}
+function fAm(r,names,divs){for(var i=0;i<names.length;i++){var it=r.data.items.find(function(x){return divs.indexOf(x.sj_div)!==-1&&x.account_nm===names[i]});if(it){var v=gA(it,r.rc);if(v)return parseInt(v.replace(/,/g,""),10)}}return null}
+function fBS(r,names){for(var i=0;i<names.length;i++){var it=r.data.items.find(function(x){return x.sj_div==="BS"&&x.account_nm===names[i]});if(it&&it.thstrm_amount)return parseInt(it.thstrm_amount.replace(/,/g,""),10)}return null}
 
-function rFull(rs,c){
-  var hd=rs.map(function(r){return"<th>"+r.corp.corp_name+"</th>"}).join(""),rows="";
+function rF(rs,c){
+  var hd=rs.map(function(r){return"<th>"+r.corp.corp_name+"</th>"}).join(""),rw="";
   ["BS","IS","CIS","CF","SCE"].forEach(function(sd){
-    var ans=[],seen={};rs.forEach(function(r){r.data.items.forEach(function(i){if(i.sj_div===sd&&!seen[i.account_nm]){seen[i.account_nm]=true;ans.push(i.account_nm)}})});
-    if(!ans.length)return;
-    rows+='<tr class="section-row"><td colspan="'+(rs.length+1)+'">'+(SJM[sd]||sd)+"</td></tr>";
-    ans.forEach(function(nm){rows+="<tr><td>"+nm+"</td>"+rs.map(function(r){var it=r.data.items.find(function(i){return i.sj_div===sd&&i.account_nm===nm});if(!it)return"<td>-</td>";var v=sd==="BS"?(it.thstrm_amount||""):(r.reprtCode!=="11011"?(it.thstrm_add_amount||it.thstrm_amount||""):(it.thstrm_amount||""));return mc(v)}).join("")+"</tr>"});
+    var an=[],sn={};rs.forEach(function(r){r.data.items.forEach(function(i){if(i.sj_div===sd&&!sn[i.account_nm]){sn[i.account_nm]=true;an.push(i.account_nm)}})});
+    if(!an.length)return;
+    rw+='<tr class="sr"><td colspan="'+(rs.length+1)+'">'+(SM[sd]||sd)+"</td></tr>";
+    an.forEach(function(nm){rw+="<tr><td>"+nm+"</td>"+rs.map(function(r){var it=r.data.items.find(function(i){return i.sj_div===sd&&i.account_nm===nm});if(!it)return"<td>-</td>";var v=sd==="BS"?(it.thstrm_amount||""):(r.rc!=="11011"?(it.thstrm_add_amount||it.thstrm_amount||""):(it.thstrm_amount||""));return mc(v)}).join("")+"</tr>"});
   });
-  c.innerHTML='<div class="table-container" style="max-height:600px;overflow-y:auto"><table><thead><tr><th>항목</th>'+hd+"</tr></thead><tbody>"+rows+"</tbody></table></div>";
+  c.innerHTML='<div class="tc" style="max-height:600px;overflow-y:auto"><table><thead><tr><th>항목</th>'+hd+"</tr></thead><tbody>"+rw+"</tbody></table></div>";
 }
 
-function rRL(rs){G("rl").innerHTML=rs.map(function(r){var rn=r.data.items[0]?r.data.items[0].rcept_no:null;if(!rn)return"";return'<a href="https://dart.fss.or.kr/dsaf001/main.do?rcpNo='+rn+'" target="_blank" class="report-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>'+r.corp.corp_name+" 원문</a>"}).join("")}
+function rRL(rs){G("rl").innerHTML=rs.map(function(r){var rn=r.data.items[0]?r.data.items[0].rcept_no:null;if(!rn)return"";return'<a href="https://dart.fss.or.kr/dsaf001/main.do?rcpNo='+rn+'" target="_blank" class="rl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>'+r.corp.corp_name+" 원문</a>"}).join("")}
 
-// ========== History ==========
-function savHist(corps,yr,rc,ql){var k=corps.map(function(c){return c.corp_code}).sort().join(",")+"|"+yr+"|"+rc;searchHistory=searchHistory.filter(function(h){return h.key!==k});searchHistory.unshift({key:k,corps:corps,year:yr,reprtCode:rc,quarterLabel:ql});if(searchHistory.length>3)searchHistory=searchHistory.slice(0,3);try{localStorage.setItem("dh",JSON.stringify(searchHistory))}catch(e){}rHist()}
-function loadHistory(){try{var s=localStorage.getItem("dh");if(s){searchHistory=JSON.parse(s);rHist()}}catch(e){}}
-function rHist(){if(!searchHistory.length){historyBar.style.display="none";return}historyBar.style.display="flex";historyChipsEl.innerHTML=searchHistory.map(function(h,i){return'<div class="history-chip" data-i="'+i+'"><span class="hist-corps">'+h.corps.map(function(c){return c.corp_name}).join(", ")+'</span><span class="hist-period">'+h.year+" "+h.quarterLabel+"</span></div>"}).join("");historyChipsEl.querySelectorAll(".history-chip").forEach(function(ch){ch.addEventListener("click",function(){var h=searchHistory[parseInt(ch.dataset.i)];selectedCorps=h.corps.map(function(c){return{corp_code:c.corp_code,corp_name:c.corp_name,stock_code:c.stock_code}});yearSelect.value=h.year;quarterSelect.value=h.reprtCode;drawChips();searchBtn.disabled=false;performSearch()})})}
+// ===== History =====
+function svH(corps,yr,rc,ql){var k=corps.map(function(c){return c.corp_code}).sort().join(",")+"|"+yr+"|"+rc;SH=SH.filter(function(h){return h.key!==k});SH.unshift({key:k,corps:corps,year:yr,rc:rc,ql:ql});if(SH.length>3)SH=SH.slice(0,3);try{localStorage.setItem("dh",JSON.stringify(SH))}catch(e){}rH()}
+function loadHist(){try{var s=localStorage.getItem("dh");if(s){SH=JSON.parse(s);rH()}}catch(e){}}
+function rH(){if(!SH.length){hB.style.display="none";return}hB.style.display="flex";hC.innerHTML=SH.map(function(h,i){return'<div class="hc" data-i="'+i+'"><span class="hcn">'+h.corps.map(function(c){return c.corp_name}).join(", ")+'</span><span class="hcp">'+h.year+" "+h.ql+"</span></div>"}).join("");hC.querySelectorAll(".hc").forEach(function(ch){ch.addEventListener("click",function(){var h=SH[parseInt(ch.dataset.i)];SC=h.corps.map(function(c){return{corp_code:c.corp_code,corp_name:c.corp_name,stock_code:c.stock_code}});yS.value=h.year;qS.value=h.rc;drC();sB.disabled=false;doFetch()})})}
 
-function showLoad(t){loadingText.textContent=t;loadingEl.classList.add("show")}
-function hideLoad(){loadingEl.classList.remove("show")}
-function showErr(m){errorBanner.textContent=m;errorBanner.classList.add("show");setTimeout(hideErr,8e3)}
-function hideErr(){errorBanner.classList.remove("show")}
+function shLd(t){lT.textContent=t;lO.classList.add("show")}
+function hdLd(){lO.classList.remove("show")}
+function shErr(m){eB.textContent=m;eB.classList.add("show");setTimeout(hdErr,8e3)}
+function hdErr(){eB.classList.remove("show")}
 </script>
 </body>
 </html>
