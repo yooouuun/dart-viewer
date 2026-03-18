@@ -93,8 +93,3 @@ export default {
     }
   }
 };
-```
-
-Commit → 배포 후 같은 URL을 다시 테스트해주세요:
-```
-https://dart-viewer.yooouuun.workers.dev/api/fnlttSinglAcnt.json?corp_code=00126380&bsns_year=2024&reprt_code=11011
