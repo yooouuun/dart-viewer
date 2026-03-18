@@ -1,4 +1,4 @@
-const DART_API_BASE = "https://opendart.fss.or.kr/api";
+var DART_API_BASE = "https://opendart.fss.or.kr/api";
 
 function corsHeaders() {
   return {
@@ -41,7 +41,38 @@ export default {
     dartUrl.searchParams.set("crtfc_key", apiKey);
 
     try {
-      var r = await fetch(dartUrl.toString());
+      var r = await fetch(dartUrl.toString(), {
+        method: "GET",
+        redirect: "manual",
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          "Accept": "application/json, text/xml, */*",
+          "Accept-Language": "ko-KR,ko;q=0.9"
+        }
+      });
+
+      if (r.status >= 300 && r.status < 400) {
+        var location = r.headers.get("location") || "";
+        if (location.indexOf("error") !== -1) {
+          return jsonResp({
+            error: "DART API rejected the request. The API key may be invalid or expired.",
+            status: r.status,
+            redirect: location
+          }, 502);
+        }
+        var r2 = await fetch(location, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "Accept": "application/json, text/xml, */*"
+          }
+        });
+        var t2 = await r2.text();
+        return new Response(t2, {
+          status: r2.status,
+          headers: Object.assign({}, corsHeaders(), { "Content-Type": r2.headers.get("content-type") || "application/json" })
+        });
+      }
+
       var ct = r.headers.get("content-type") || "";
 
       if (ct.indexOf("zip") !== -1 || ct.indexOf("octet") !== -1) {
@@ -62,3 +93,8 @@ export default {
     }
   }
 };
+```
+
+Commit → 배포 후 같은 URL을 다시 테스트해주세요:
+```
+https://dart-viewer.yooouuun.workers.dev/api/fnlttSinglAcnt.json?corp_code=00126380&bsns_year=2024&reprt_code=11011
