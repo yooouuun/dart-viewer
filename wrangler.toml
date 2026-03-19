@@ -7,3 +7,4 @@ directory = "./public"
 
 [vars]
 DART_API_KEY = "a9a1b6d42a2414cc31a9f0f809369d8eab15a2ba"
+G2B_API_KEY = "e79dce8fac3d9992b721c0a48c3d24665704bbe5da96c9cdea29ce17dcfc5406"
