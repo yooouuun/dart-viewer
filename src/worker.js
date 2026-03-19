@@ -32,6 +32,11 @@ export default {
       return jsonResp({ error: "No API path" }, 400);
     }
 
+    // ===== G2B (조달청) API 라우팅 =====
+    if (apiPath.startsWith("g2b/")) {
+      return handleG2B(apiPath.replace("g2b/", ""), url, env);
+    }
+
     var apiKey = env.DART_API_KEY || "";
     var dartUrl = new URL(DART_API_BASE + "/" + apiPath);
 
@@ -80,3 +85,61 @@ export default {
     }
   }
 };
+
+// ===== G2B (조달청 종합쇼핑몰) API 프록시 =====
+var G2B_ENDPOINTS = {
+  "shopping-items": "https://apis.data.go.kr/1230000/MSSrvcProdInfoService",
+  "delivery": "https://apis.data.go.kr/1230000/MSSrvcDeliveryInfoService",
+  "standard": "https://apis.data.go.kr/1230000/PubDataOpnStdService"
+};
+
+async function handleG2B(subPath, url, env) {
+  var parts = subPath.split("/");
+  var group = parts[0];
+  var operation = parts.slice(1).join("/");
+
+  var serviceKey = env.G2B_API_KEY || env.DATA_GO_KR_API_KEY || "";
+  if (!serviceKey) {
+    return jsonResp({ error: "G2B_API_KEY 환경변수를 설정하세요" }, 500);
+  }
+
+  var baseUrl = G2B_ENDPOINTS[group];
+  if (!baseUrl) {
+    return jsonResp({ error: "Unknown G2B API group: " + group, available: Object.keys(G2B_ENDPOINTS) }, 400);
+  }
+
+  try {
+    var target = new URL(operation ? baseUrl + "/" + operation : baseUrl);
+
+    url.searchParams.forEach(function(v, k) {
+      if (k !== "serviceKey" && k !== "ServiceKey") {
+        target.searchParams.set(k, v);
+      }
+    });
+    target.searchParams.set("serviceKey", serviceKey);
+
+    if (!target.searchParams.has("type")) {
+      target.searchParams.set("type", "json");
+    }
+
+    var resp = await fetch(target.toString(), {
+      method: "GET",
+      headers: {
+        "Accept": "application/json, application/xml, text/xml, */*"
+      }
+    });
+
+    var body = await resp.text();
+    var ct = resp.headers.get("content-type") || "application/json";
+
+    return new Response(body, {
+      status: resp.status,
+      headers: Object.assign({}, corsHeaders(), {
+        "Content-Type": ct,
+        "Cache-Control": "public, max-age=300"
+      })
+    });
+  } catch (e) {
+    return jsonResp({ error: "G2B API 호출 실패: " + e.message }, 502);
+  }
+}
