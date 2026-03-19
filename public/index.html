@@ -696,28 +696,84 @@ async function gApi(group,op,params){
   var qs=new URLSearchParams(params);
   try{
     var r=await fetch("/api/g2b/"+group+"/"+op+"?"+qs);
-    if(r.ok)return await r.json();
-  }catch(e){}
-  // Direct fallback
+    if(r.ok){var j=await r.json();console.log("[G2B API] "+group+"/"+op+" raw:",j);return j}
+  }catch(e){console.warn("[G2B API] proxy failed:",e)}
   if(g2bKey){
     var eps={"shopping-items":"https://apis.data.go.kr/1230000/MSSrvcProdInfoService","delivery":"https://apis.data.go.kr/1230000/MSSrvcDeliveryInfoService"};
     var base=eps[group];if(!base)throw new Error("Unknown group");
     params.serviceKey=g2bKey;params.type="json";
     var dqs=new URLSearchParams(params);
     var r2=await fetch(base+"/"+op+"?"+dqs);
-    if(r2.ok)return await r2.json();
+    if(r2.ok){var j2=await r2.json();console.log("[G2B API direct] "+group+"/"+op+" raw:",j2);return j2}
   }
   throw new Error("API 호출 실패");
 }
 
 function gExtract(d){
   if(!d)return[];
-  if(d.response&&d.response.body&&d.response.body.items){var it=d.response.body.items;return Array.isArray(it)?it:(it.item||[])}
-  if(d.body&&d.body.items)return Array.isArray(d.body.items)?d.body.items:[];
-  if(Array.isArray(d.data))return d.data;
-  if(Array.isArray(d))return d;
+  if(d.response&&d.response.body&&d.response.body.items){
+    var it=d.response.body.items;
+    var arr=Array.isArray(it)?it:(it.item?it.item:[]);
+    if(!Array.isArray(arr))arr=[arr];
+    if(arr.length>0)console.log("[G2B] 첫 번째 아이템 필드:", Object.keys(arr[0]), "샘플:", arr[0]);
+    return arr;
+  }
+  if(d.body&&d.body.items){var a2=Array.isArray(d.body.items)?d.body.items:(d.body.items.item||[]);if(!Array.isArray(a2))a2=[a2];if(a2.length>0)console.log("[G2B] body.items 첫 아이템:", Object.keys(a2[0]),a2[0]);return a2}
+  if(Array.isArray(d.data)){if(d.data.length>0)console.log("[G2B] data[] 첫 아이템:", Object.keys(d.data[0]),d.data[0]);return d.data}
+  if(Array.isArray(d)){if(d.length>0)console.log("[G2B] root[] 첫 아이템:", Object.keys(d[0]),d[0]);return d}
+  console.warn("[G2B] 아이템 추출 실패, 전체 구조:", JSON.stringify(d).slice(0,500));
   return[];
 }
+
+// ===== 필드 자동 감지 =====
+// API마다 필드명이 다르므로, 후보 리스트에서 실제 존재하는 필드를 찾음
+function gField(item,candidates,fallback){
+  if(!item)return fallback||"-";
+  for(var i=0;i<candidates.length;i++){
+    if(item[candidates[i]]!=null&&item[candidates[i]]!=="")return item[candidates[i]];
+  }
+  return fallback||"-";
+}
+// 숫자 필드
+function gNumField(item,candidates){
+  if(!item)return 0;
+  for(var i=0;i<candidates.length;i++){
+    var v=item[candidates[i]];
+    if(v!=null&&v!==""){var n=Number(String(v).replace(/,/g,""));if(!isNaN(n))return n}
+  }
+  return 0;
+}
+
+// 품목명 후보
+var F_NAME=["prdctNm","prdnm","prductNm","thngNm","bidNtceNm","물품식별명","물품명","prodNm","dtlPrdctNm","prdctIdntfyNm"];
+// 세부품명
+var F_DETAIL=["dtlPrdctNm","dtlPrdnm","세부품명","세부품명명칭","dtlPrdctClsfcNm"];
+// 벤더/업체
+var F_VENDOR=["cntrctBsnmNm","bsnmNm","entrpsNm","coNm","compNm","업체","업체명","dlgtEntrpsNm","vendorNm"];
+// 계약단가
+var F_PRICE=["cntrctUntpc","prdctUprc","untpc","계약단가","unitPc","asignBdgtAmt","bdgtAmt"];
+// 계약번호
+var F_CTRNO=["cntrctNo","cntrctno","계약번호","cntrtNo","cntrNo"];
+// 계약유형
+var F_TYPE=["cntrctTyNm","cntrctMthdNm","계약유형","purchsTypNm","contractType"];
+// 등록일
+var F_DATE=["rgstDt","rgstYmd","쇼핑몰등록일자","creatDt","rgsDt","prdctRgstYmd"];
+// MAS 여부
+var F_MAS=["masYn","masAt","MAS여부"];
+// 물품분류
+var F_CLASS=["prdctClsfcNm","물품분류명","clsfcNm","goodsClNm"];
+// 납품금액
+var F_DLVAMT=["dlvrAmt","dlvyAmt","납품금액","품대금액","dlvAmt","grntyAmt"];
+// 납품수량
+var F_DLVQTY=["dlvrQty","dlvyQy","납품수량","dlvQty"];
+// 납품단가
+var F_DLVPRC=["dlvrUntpc","dlvyUntpc","납품단가","dlvUntpc"];
+// 수요기관
+var F_AGENCY=["dmndInsttNm","dmndInstNm","수요기관명","dmndOgnzNm","rcvInsttNm","ordrInsttNm"];
+// 수요기관 지역
+var F_REGION=["dmndInsttRgnNm","수요기관소재시도","dmndInstSidoNm","sido"];
+// 결재일/납품일
+var F_DLVDT=["dlvrDt","dlvyDe","결재일자","dlvDt","sgnDt","cntrctDe"];
 
 var gPalette=["#3b82f6","#8b5cf6","#10b981","#f59e0b","#ef4444","#06b6d4","#ec4899","#84cc16","#f97316","#6366f1"];
 function gColors(n){return Array.from({length:n},function(_,i){return gPalette[i%gPalette.length]})}
@@ -756,18 +812,18 @@ async function gpSearch(){
   try{
     var d=await gApi("shopping-items","getProductInfoList",{numOfRows:100,pageNo:1,prdctNm:kw,type:"json"});
     gpItems=gExtract(d);
-  }catch(e){gpItems=[]}
-  if(!gpItems.length)gpItems=gDemoProducts(kw);
+  }catch(e){console.error("[G2B]",e);gpItems=[]}
+  if(!gpItems.length){gpItems=gDemoProducts(kw);console.log("[G2B] 실제 API 데이터 없음 → 샘플 데이터 사용")}
   var vf=G("gp-ven").value.trim();
-  if(vf)gpItems=gpItems.filter(function(i){return(i.cntrctBsnmNm||"").indexOf(vf)!==-1});
+  if(vf)gpItems=gpItems.filter(function(i){return gField(i,F_VENDOR,"").indexOf(vf)!==-1});
   gpSort();
 }
 function gpSort(){
   var s=G("gp-sort").value;
   gpItems.sort(function(a,b){
-    var pa=Number(a.cntrctUntpc||0),pb=Number(b.cntrctUntpc||0);
+    var pa=gNumField(a,F_PRICE),pb=gNumField(b,F_PRICE);
     if(s==="pa")return pa-pb;if(s==="pd")return pb-pa;
-    return(a.prdctNm||"").localeCompare(b.prdctNm||"");
+    return gField(a,F_NAME,"").localeCompare(gField(b,F_NAME,""));
   });
   gpRender();
 }
@@ -776,13 +832,17 @@ G("gp-sort").addEventListener("change",function(){if(gpItems.length)gpSort()});
 function gpRender(){
   if(!gpItems.length)return gEmpty("gp-result");
   G("gp-stats").style.display="grid";
-  var prices=gpItems.map(function(i){return Number(i.cntrctUntpc||0)}).filter(function(p){return p>0});
-  var vens=new Set(gpItems.map(function(i){return i.cntrctBsnmNm||"-"}));
+  var prices=gpItems.map(function(i){return gNumField(i,F_PRICE)}).filter(function(p){return p>0});
+  var vens=new Set(gpItems.map(function(i){return gField(i,F_VENDOR,"-")}));
   G("gs-total").textContent=gFmt(gpItems.length);
   G("gs-vcnt").textContent=gFmt(vens.size);
   G("gs-avg").textContent=prices.length?gFmtP(prices.reduce(function(s,p){return s+p},0)/prices.length)+"원":"-";
   G("gs-min").textContent=prices.length?gFmtP(Math.min.apply(null,prices))+"원":"-";
-  G("gp-result").innerHTML='<div class="tc" style="max-height:500px;overflow-y:auto"><table><thead><tr><th style="text-align:left">#</th><th style="text-align:left">물품식별명</th><th style="text-align:left">벤더</th><th>계약단가</th><th>계약번호</th><th>유형</th><th>등록일</th><th>MAS</th></tr></thead><tbody>'+gpItems.map(function(it,i){return"<tr><td style='text-align:left;font-family:JetBrains Mono,monospace;font-size:12px'>"+(i+1)+"</td><td style='text-align:left;font-family:Noto Sans KR,sans-serif'>"+(it.prdctNm||"-")+(it.dtlPrdctNm?"<br><small style='color:var(--t3)'>"+it.dtlPrdctNm+"</small>":"")+"</td><td style='text-align:left;font-weight:600;color:var(--acb)'>"+(it.cntrctBsnmNm||"-")+"</td><td style='color:#f59e0b;font-weight:600'>"+gFmt(it.cntrctUntpc)+"원</td><td>"+( it.cntrctNo||"-")+"</td><td style='text-align:left'>"+( it.cntrctTyNm||"-")+"</td><td>"+(it.rgstDt||"-")+"</td><td style='text-align:center'>"+((it.masYn)==="Y"?"✅":"-")+"</td></tr>"}).join("")+"</tbody></table></div>";
+  G("gp-result").innerHTML='<div class="tc" style="max-height:500px;overflow-y:auto"><table><thead><tr><th style="text-align:left">#</th><th style="text-align:left">물품식별명</th><th style="text-align:left">벤더</th><th>계약단가</th><th>계약번호</th><th>유형</th><th>등록일</th><th>MAS</th></tr></thead><tbody>'+gpItems.map(function(it,i){
+    var nm=gField(it,F_NAME,"-"),dtl=gField(it,F_DETAIL,""),ven=gField(it,F_VENDOR,"-");
+    var prc=gNumField(it,F_PRICE),cno=gField(it,F_CTRNO,"-"),typ=gField(it,F_TYPE,"-");
+    var dt=gField(it,F_DATE,"-"),mas=gField(it,F_MAS,"");
+    return"<tr><td style='text-align:left;font-family:JetBrains Mono,monospace;font-size:12px'>"+(i+1)+"</td><td style='text-align:left;font-family:Noto Sans KR,sans-serif'>"+nm+(dtl?"<br><small style='color:var(--t3)'>"+dtl+"</small>":"")+"</td><td style='text-align:left;font-weight:600;color:var(--acb)'>"+ven+"</td><td style='color:#f59e0b;font-weight:600'>"+(prc>0?gFmt(prc)+"원":"-")+"</td><td>"+cno+"</td><td style='text-align:left'>"+typ+"</td><td>"+dt+"</td><td style='text-align:center'>"+(mas==="Y"?"✅":"-")+"</td></tr>"}).join("")+"</tbody></table></div>";
 }
 
 // ===== G2B: Delivery =====
@@ -794,36 +854,36 @@ async function gdSearch(){
   try{
     var d=await gApi("delivery","getDeliveryInfoList",{numOfRows:200,pageNo:1,prdctNm:kw,sttDt:(G("gd-from").value||"").replace(/-/g,""),endDt:(G("gd-to").value||"").replace(/-/g,""),type:"json"});
     items=gExtract(d);
-  }catch(e){items=[]}
-  if(!items.length)items=gDemoDeliveries(kw);
+  }catch(e){console.error("[G2B dlv]",e);items=[]}
+  if(!items.length){items=gDemoDeliveries(kw);console.log("[G2B] 납품 API 데이터 없음 → 샘플 사용")}
   var vf=G("gd-ven").value.trim();
-  if(vf)items=items.filter(function(i){return(i.entrpsNm||"").indexOf(vf)!==-1});
+  if(vf)items=items.filter(function(i){return gField(i,F_VENDOR,"").indexOf(vf)!==-1});
   gdRender(items);
 }
 function gdRender(items){
   if(!items.length)return gEmpty("gd-result");
   G("gd-stats").style.display="grid";
-  var tot=items.reduce(function(s,i){return s+Number(i.dlvrAmt||0)},0);
-  var vs=new Set(items.map(function(i){return i.entrpsNm||"-"}));
-  var as=new Set(items.map(function(i){return i.dmndInsttNm||"-"}));
+  var tot=items.reduce(function(s,i){return s+gNumField(i,F_DLVAMT)},0);
+  var vs=new Set(items.map(function(i){return gField(i,F_VENDOR,"-")}));
+  var as=new Set(items.map(function(i){return gField(i,F_AGENCY,"-")}));
   G("gds-cnt").textContent=gFmt(items.length);
   G("gds-amt").textContent=gFmtP(tot)+"원";
   G("gds-ven").textContent=gFmt(vs.size);
   G("gds-agn").textContent=gFmt(as.size);
 
-  // Charts
   G("gd-charts").style.display="grid";
-  var monthly={};items.forEach(function(i){var d=i.dlvrDt||"";var ym=d.length>=6?d.slice(0,4)+"-"+d.slice(4,6):"";if(ym)monthly[ym]=(monthly[ym]||0)+Number(i.dlvrAmt||0)});
+  var monthly={};items.forEach(function(i){var d=gField(i,F_DLVDT,"");var ym=d.length>=6?d.slice(0,4)+"-"+d.slice(4,6):(d.length>=7?d.slice(0,7):"");if(ym)monthly[ym]=(monthly[ym]||0)+gNumField(i,F_DLVAMT)});
   var ms=Object.keys(monthly).sort();
   if(gcM)gcM.destroy();
   gcM=new Chart(G("gc-monthly"),{type:"line",data:{labels:ms,datasets:[{label:"납품금액",data:ms.map(function(m){return monthly[m]}),borderColor:"#3b82f6",backgroundColor:"rgba(59,130,246,.1)",fill:true,tension:.3,pointRadius:3,pointBackgroundColor:"#3b82f6"}]},options:gChartOpts("원")});
 
-  var va={};items.forEach(function(i){var v=i.entrpsNm||"미상";va[v]=(va[v]||0)+Number(i.dlvrAmt||0)});
+  var va={};items.forEach(function(i){var v=gField(i,F_VENDOR,"미상");va[v]=(va[v]||0)+gNumField(i,F_DLVAMT)});
   var tv=Object.entries(va).sort(function(a,b){return b[1]-a[1]}).slice(0,10);
   if(gcV)gcV.destroy();
   gcV=new Chart(G("gc-vendor"),{type:"bar",data:{labels:tv.map(function(v){return v[0]}),datasets:[{label:"납품금액",data:tv.map(function(v){return v[1]}),backgroundColor:gColors(tv.length),borderRadius:4}]},options:Object.assign({},gChartOpts("원"),{indexAxis:"y"})});
 
-  G("gd-result").innerHTML='<div class="tc" style="max-height:400px;overflow-y:auto"><table><thead><tr><th style="text-align:left">#</th><th style="text-align:left">물품식별명</th><th style="text-align:left">벤더</th><th>납품금액</th><th>수량</th><th>납품단가</th><th style="text-align:left">수요기관</th><th>결재일</th></tr></thead><tbody>'+items.slice(0,100).map(function(it,i){return"<tr><td style='text-align:left'>"+( i+1)+"</td><td style='text-align:left;font-family:Noto Sans KR,sans-serif'>"+(it.prdctNm||"-")+"</td><td style='text-align:left;font-weight:600;color:var(--acb)'>"+(it.entrpsNm||"-")+"</td><td style='color:#f59e0b;font-weight:600'>"+gFmt(it.dlvrAmt)+"원</td><td>"+gFmt(it.dlvrQty)+"</td><td>"+gFmt(it.dlvrUntpc)+"원</td><td style='text-align:left'>"+(it.dmndInsttNm||"-")+"</td><td>"+(it.dlvrDt||"-")+"</td></tr>"}).join("")+"</tbody></table></div>";
+  G("gd-result").innerHTML='<div class="tc" style="max-height:400px;overflow-y:auto"><table><thead><tr><th style="text-align:left">#</th><th style="text-align:left">물품식별명</th><th style="text-align:left">벤더</th><th>납품금액</th><th>수량</th><th>납품단가</th><th style="text-align:left">수요기관</th><th>결재일</th></tr></thead><tbody>'+items.slice(0,100).map(function(it,i){
+    return"<tr><td style='text-align:left'>"+(i+1)+"</td><td style='text-align:left;font-family:Noto Sans KR,sans-serif'>"+gField(it,F_NAME,"-")+"</td><td style='text-align:left;font-weight:600;color:var(--acb)'>"+gField(it,F_VENDOR,"-")+"</td><td style='color:#f59e0b;font-weight:600'>"+gFmt(gNumField(it,F_DLVAMT))+"원</td><td>"+gFmt(gNumField(it,F_DLVQTY))+"</td><td>"+gFmt(gNumField(it,F_DLVPRC))+"원</td><td style='text-align:left'>"+gField(it,F_AGENCY,"-")+"</td><td>"+gField(it,F_DLVDT,"-")+"</td></tr>"}).join("")+"</tbody></table></div>";
 }
 
 // ===== G2B: Demand =====
@@ -835,34 +895,34 @@ async function gmSearch(){
   try{
     var d=await gApi("delivery","getDeliveryInfoList",{numOfRows:200,pageNo:1,prdctNm:kw,sttDt:(G("gm-from").value||"").replace(/-/g,""),endDt:(G("gm-to").value||"").replace(/-/g,""),type:"json"});
     items=gExtract(d);
-  }catch(e){items=[]}
-  if(!items.length)items=gDemoDeliveries(kw);
+  }catch(e){console.error("[G2B dmd]",e);items=[]}
+  if(!items.length){items=gDemoDeliveries(kw);console.log("[G2B] 수요기관 API 데이터 없음 → 샘플 사용")}
   var af=G("gm-agn").value.trim();
-  if(af)items=items.filter(function(i){return(i.dmndInsttNm||"").indexOf(af)!==-1});
+  if(af)items=items.filter(function(i){return gField(i,F_AGENCY,"").indexOf(af)!==-1});
   gmRender(items);
 }
 function gmRender(items){
   if(!items.length)return gEmpty("gm-result");
   G("gm-stats").style.display="grid";
-  var as2=new Set(items.map(function(i){return i.dmndInsttNm||"-"}));
-  var tot=items.reduce(function(s,i){return s+Number(i.dlvrAmt||0)},0);
+  var as2=new Set(items.map(function(i){return gField(i,F_AGENCY,"-")}));
+  var tot=items.reduce(function(s,i){return s+gNumField(i,F_DLVAMT)},0);
   G("gms-agn").textContent=gFmt(as2.size);
   G("gms-amt").textContent=gFmtP(tot)+"원";
   G("gms-cnt").textContent=gFmt(items.length);
   G("gms-avg").textContent=gFmtP(tot/items.length)+"원";
 
   G("gm-charts").style.display="grid";
-  var aa={};items.forEach(function(i){var a=i.dmndInsttNm||"미상";aa[a]=(aa[a]||0)+Number(i.dlvrAmt||0)});
+  var aa={};items.forEach(function(i){var a=gField(i,F_AGENCY,"미상");aa[a]=(aa[a]||0)+gNumField(i,F_DLVAMT)});
   var ta=Object.entries(aa).sort(function(a,b){return b[1]-a[1]}).slice(0,10);
   if(gcA)gcA.destroy();
   gcA=new Chart(G("gc-agency"),{type:"bar",data:{labels:ta.map(function(a){return a[0]}),datasets:[{label:"구매금액",data:ta.map(function(a){return a[1]}),backgroundColor:gColors(ta.length),borderRadius:4}]},options:Object.assign({},gChartOpts("원"),{indexAxis:"y"})});
 
-  var ra={};items.forEach(function(i){var r=i.dmndInsttRgnNm||"기타";ra[r]=(ra[r]||0)+Number(i.dlvrAmt||0)});
+  var ra={};items.forEach(function(i){var r=gField(i,F_REGION,"기타");ra[r]=(ra[r]||0)+gNumField(i,F_DLVAMT)});
   var rg=Object.entries(ra).sort(function(a,b){return b[1]-a[1]});
   if(gcR)gcR.destroy();
   gcR=new Chart(G("gc-region"),{type:"doughnut",data:{labels:rg.map(function(r){return r[0]}),datasets:[{data:rg.map(function(r){return r[1]}),backgroundColor:gColors(rg.length),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"right",labels:{color:"#8899b4",font:{size:11},boxWidth:12,padding:8}},tooltip:{callbacks:{label:function(c){return c.label+": "+gFmtP(c.raw)+"원"}}}}}});
 
-  var agMap={};items.forEach(function(i){var n=i.dmndInsttNm||"-";if(!agMap[n])agMap[n]={cnt:0,amt:0,rgn:i.dmndInsttRgnNm||"-"};agMap[n].cnt++;agMap[n].amt+=Number(i.dlvrAmt||0)});
+  var agMap={};items.forEach(function(i){var n=gField(i,F_AGENCY,"-");if(!agMap[n])agMap[n]={cnt:0,amt:0,rgn:gField(i,F_REGION,"-")};agMap[n].cnt++;agMap[n].amt+=gNumField(i,F_DLVAMT)});
   var sorted=Object.entries(agMap).sort(function(a,b){return b[1].amt-a[1].amt});
   G("gm-result").innerHTML='<div class="tc"><table><thead><tr><th style="text-align:left">#</th><th style="text-align:left">수요기관</th><th style="text-align:left">소재지</th><th>건수</th><th>구매금액</th><th>건당 평균</th></tr></thead><tbody>'+sorted.map(function(e,i){var n=e[0],d=e[1];return"<tr><td style='text-align:left'>"+(i+1)+"</td><td style='text-align:left;font-weight:600;color:var(--acb)'>"+n+"</td><td style='text-align:left'>"+d.rgn+"</td><td>"+gFmt(d.cnt)+"</td><td style='color:#f59e0b;font-weight:600'>"+gFmtP(d.amt)+"원</td><td>"+gFmtP(d.amt/d.cnt)+"원</td></tr>"}).join("")+"</tbody></table></div>";
 }
@@ -876,26 +936,26 @@ async function gcSearch(){
     var d=await gApi("shopping-items","getProductInfoList",{numOfRows:100,pageNo:1,prdctNm:kw,type:"json"});
     items=gExtract(d);
   }catch(e){items=[]}
-  if(!items.length)items=gDemoProducts(kw);
+  if(!items.length){items=gDemoProducts(kw);console.log("[G2B] 비교 API 데이터 없음 → 샘플 사용")}
   gcRender(items);
 }
 function gcRender(items){
   if(!items.length)return gEmpty("gc-result");
   var by=G("gc-grp").value;
-  var groups={};items.forEach(function(i){var k=by==="model"?(i.prdctNm||"기타"):(i.prdctClsfcNm||"기타");if(!groups[k])groups[k]=[];groups[k].push(i)});
-  var multi=Object.entries(groups).filter(function(e){var vs=new Set(e[1].map(function(i){return i.cntrctBsnmNm||"-"}));return vs.size>=2});
+  var groups={};items.forEach(function(i){var k=by==="model"?gField(i,F_NAME,"기타"):gField(i,F_CLASS,"기타");if(!groups[k])groups[k]=[];groups[k].push(i)});
+  var multi=Object.entries(groups).filter(function(e){var vs=new Set(e[1].map(function(i){return gField(i,F_VENDOR,"-")}));return vs.size>=2});
   if(!multi.length){G("gc-result").innerHTML='<div class="es"><div class="es-i">🤔</div><h3>비교 가능 품목 없음</h3><p>2개 이상 벤더가 등록한 동일 품목이 없습니다</p></div>';return}
   var html="";
   multi.forEach(function(e){
     var name=e[0],its=e[1];
-    its.sort(function(a,b){return Number(a.cntrctUntpc||0)-Number(b.cntrctUntpc||0)});
-    var prices=its.map(function(i){return Number(i.cntrctUntpc||0)}).filter(function(p){return p>0});
+    its.sort(function(a,b){return gNumField(a,F_PRICE)-gNumField(b,F_PRICE)});
+    var prices=its.map(function(i){return gNumField(i,F_PRICE)}).filter(function(p){return p>0});
     var minP=prices.length?Math.min.apply(null,prices):0,maxP=prices.length?Math.max.apply(null,prices):0;
     html+='<div class="cmp-group"><div class="cmp-group-title">'+name+'<span style="float:right;font-size:12px;color:var(--t3)">'+(minP?"최저 "+gFmt(minP)+"원 ~ 최고 "+gFmt(maxP)+"원"+(minP?" (차이 "+((maxP-minP)/minP*100).toFixed(1)+"%)":""):"")+'</span></div><div class="tc"><table><thead><tr><th style="text-align:left">벤더</th><th>계약단가</th><th>최저가 대비</th><th>계약번호</th><th style="text-align:center">MAS</th></tr></thead><tbody>';
     its.forEach(function(i){
-      var p=Number(i.cntrctUntpc||0),isMin=p===minP&&minP>0;
+      var p=gNumField(i,F_PRICE),isMin=p===minP&&minP>0;
       var diff=minP>0?((p-minP)/minP*100).toFixed(1):0;
-      html+="<tr><td style='text-align:left;font-weight:600;color:var(--acb)'>"+(i.cntrctBsnmNm||"-")+"</td><td class='"+(isMin?"price-low":"")+"' style='"+(isMin?"":"color:#f59e0b;font-weight:600")+"'>"+gFmt(p)+"원"+(isMin?" ⭐":"")+"</td><td style='color:"+(diff>0?"var(--red)":"var(--grn)")+"'>"+(diff>0?"+"+diff+"%":"기준")+"</td><td>"+(i.cntrctNo||"-")+"</td><td style='text-align:center'>"+((i.masYn)==="Y"?"✅":"-")+"</td></tr>";
+      html+="<tr><td style='text-align:left;font-weight:600;color:var(--acb)'>"+gField(i,F_VENDOR,"-")+"</td><td class='"+(isMin?"price-low":"")+"' style='"+(isMin?"":"color:#f59e0b;font-weight:600")+"'>"+(p>0?gFmt(p)+"원":"-")+(isMin?" ⭐":"")+"</td><td style='color:"+(diff>0?"var(--red)":"var(--grn)")+"'>"+(diff>0?"+"+diff+"%":"기준")+"</td><td>"+gField(i,F_CTRNO,"-")+"</td><td style='text-align:center'>"+(gField(i,F_MAS,"")==="Y"?"✅":"-")+"</td></tr>";
     });
     html+="</tbody></table></div></div>";
   });
