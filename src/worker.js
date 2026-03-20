@@ -88,8 +88,8 @@ export default {
 
 // ===== G2B (조달청 종합쇼핑몰) API 프록시 =====
 var G2B_ENDPOINTS = {
-  "shopping-items": "https://apis.data.go.kr/1230000/MSSrvcProdInfoService",
-  "delivery": "https://apis.data.go.kr/1230000/MSSrvcDeliveryInfoService",
+  "shopping-items": "https://apis.data.go.kr/1230000/at/ShoppingMallPrdctInfoService",
+  "delivery": "https://apis.data.go.kr/1230000/at/ShoppingMallPrdctInfoService",
   "standard": "https://apis.data.go.kr/1230000/PubDataOpnStdService"
 };
 
@@ -109,7 +109,7 @@ async function handleG2B(subPath, url, env) {
   }
 
   try {
-    var target = new URL(operation ? baseUrl + "/" + operation : baseUrl);
+    var target = new URL(baseUrl + (operation ? "/" + operation : ""));
 
     url.searchParams.forEach(function(v, k) {
       if (k !== "serviceKey" && k !== "ServiceKey") {
