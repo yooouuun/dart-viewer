@@ -744,36 +744,43 @@ function gNumField(item,candidates){
   return 0;
 }
 
-// 품목명 후보
-var F_NAME=["prdctNm","prdnm","prductNm","thngNm","bidNtceNm","물품식별명","물품명","prodNm","dtlPrdctNm","prdctIdntfyNm"];
-// 세부품명
-var F_DETAIL=["dtlPrdctNm","dtlPrdnm","세부품명","세부품명명칭","dtlPrdctClsfcNm"];
+// 실제 API 응답 필드명 기반 매핑
+// 품목 규격명 (제품명+모델명 포함)
+var F_NAME=["prdctSpecNm","prdctClsfcNoNm","prdctNm"];
+// 품명 분류
+var F_DETAIL=["prodctChrInfoIntrcn","prdctClsfcNoNm"];
 // 벤더/업체
-var F_VENDOR=["cntrctBsnmNm","bsnmNm","entrpsNm","coNm","compNm","업체","업체명","dlgtEntrpsNm","vendorNm"];
+var F_VENDOR=["cntrctCorpNm","entrpsNm","cntrctBsnmNm"];
 // 계약단가
-var F_PRICE=["cntrctUntpc","prdctUprc","untpc","계약단가","unitPc","asignBdgtAmt","bdgtAmt"];
+var F_PRICE=["cntrctPrceAmt","orderCalclPrceAmt","cntrctUntpc"];
 // 계약번호
-var F_CTRNO=["cntrctNo","cntrctno","계약번호","cntrtNo","cntrNo"];
+var F_CTRNO=["shopngCntrctNo","cntrctNo"];
 // 계약유형
-var F_TYPE=["cntrctTyNm","cntrctMthdNm","계약유형","purchsTypNm","contractType"];
+var F_TYPE=["cntrctMthdNm","cntrctTyNm"];
 // 등록일
-var F_DATE=["rgstDt","rgstYmd","쇼핑몰등록일자","creatDt","rgsDt","prdctRgstYmd"];
-// MAS 여부
-var F_MAS=["masYn","masAt","MAS여부"];
+var F_DATE=["rgstDt","cntrctDate","cntrctBgnDate"];
+// MAS 여부 (cntrctMthdNm에 "다수"가 포함되면 MAS)
+var F_MAS=["masYn"];
 // 물품분류
-var F_CLASS=["prdctClsfcNm","물품분류명","clsfcNm","goodsClNm"];
-// 납품금액
-var F_DLVAMT=["dlvrAmt","dlvyAmt","납품금액","품대금액","dlvAmt","grntyAmt"];
+var F_CLASS=["prdctClsfcNoNm","prdctMidclsfcNm"];
+// 제조사
+var F_MAKER=["prdctMakrNm"];
+// 물품식별번호
+var F_IDNO=["prdctIdntNo"];
+// 기업규모
+var F_CORPTYPE=["entrprsDivNm"];
+// 납품금액 (납품요구 API용)
+var F_DLVAMT=["dlvrAmt","dlvyAmt","cntrctPrceAmt"];
 // 납품수량
-var F_DLVQTY=["dlvrQty","dlvyQy","납품수량","dlvQty"];
+var F_DLVQTY=["dlvrQty","dlvyQy"];
 // 납품단가
-var F_DLVPRC=["dlvrUntpc","dlvyUntpc","납품단가","dlvUntpc"];
+var F_DLVPRC=["dlvrUntpc","dlvyUntpc","cntrctPrceAmt"];
 // 수요기관
-var F_AGENCY=["dmndInsttNm","dmndInstNm","수요기관명","dmndOgnzNm","rcvInsttNm","ordrInsttNm"];
+var F_AGENCY=["dmndInsttNm","acptncInsttNm","ordrInsttNm"];
 // 수요기관 지역
-var F_REGION=["dmndInsttRgnNm","수요기관소재시도","dmndInstSidoNm","sido"];
+var F_REGION=["dmndInsttRgnNm","hdoffceLocplc"];
 // 결재일/납품일
-var F_DLVDT=["dlvrDt","dlvyDe","결재일자","dlvDt","sgnDt","cntrctDe"];
+var F_DLVDT=["dlvrDt","dlvyDe","cntrctDate","sgnDt"];
 
 var gPalette=["#3b82f6","#8b5cf6","#10b981","#f59e0b","#ef4444","#06b6d4","#ec4899","#84cc16","#f97316","#6366f1"];
 function gColors(n){return Array.from({length:n},function(_,i){return gPalette[i%gPalette.length]})}
@@ -810,7 +817,7 @@ async function gpSearch(){
   var kw=G("gp-kw").value.trim();if(!kw)return;
   gLoading("gp-result");G("gp-stats").style.display="none";
   try{
-    var d=await gApi("shopping-items","getProductInfoList",{numOfRows:100,pageNo:1,prdctNm:kw,type:"json"});
+    var d=await gApi("shopping-items","getMASCntrctPrdctInfoList",{numOfRows:100,pageNo:1,prdctClsfcNoNm:kw,inqryDiv:1,type:"json"});
     gpItems=gExtract(d);
   }catch(e){console.error("[G2B]",e);gpItems=[]}
   if(!gpItems.length){gpItems=gDemoProducts(kw);console.log("[G2B] 실제 API 데이터 없음 → 샘플 데이터 사용")}
@@ -838,11 +845,11 @@ function gpRender(){
   G("gs-vcnt").textContent=gFmt(vens.size);
   G("gs-avg").textContent=prices.length?gFmtP(prices.reduce(function(s,p){return s+p},0)/prices.length)+"원":"-";
   G("gs-min").textContent=prices.length?gFmtP(Math.min.apply(null,prices))+"원":"-";
-  G("gp-result").innerHTML='<div class="tc" style="max-height:500px;overflow-y:auto"><table><thead><tr><th style="text-align:left">#</th><th style="text-align:left">물품식별명</th><th style="text-align:left">벤더</th><th>계약단가</th><th>계약번호</th><th>유형</th><th>등록일</th><th>MAS</th></tr></thead><tbody>'+gpItems.map(function(it,i){
-    var nm=gField(it,F_NAME,"-"),dtl=gField(it,F_DETAIL,""),ven=gField(it,F_VENDOR,"-");
-    var prc=gNumField(it,F_PRICE),cno=gField(it,F_CTRNO,"-"),typ=gField(it,F_TYPE,"-");
-    var dt=gField(it,F_DATE,"-"),mas=gField(it,F_MAS,"");
-    return"<tr><td style='text-align:left;font-family:JetBrains Mono,monospace;font-size:12px'>"+(i+1)+"</td><td style='text-align:left;font-family:Noto Sans KR,sans-serif'>"+nm+(dtl?"<br><small style='color:var(--t3)'>"+dtl+"</small>":"")+"</td><td style='text-align:left;font-weight:600;color:var(--acb)'>"+ven+"</td><td style='color:#f59e0b;font-weight:600'>"+(prc>0?gFmt(prc)+"원":"-")+"</td><td>"+cno+"</td><td style='text-align:left'>"+typ+"</td><td>"+dt+"</td><td style='text-align:center'>"+(mas==="Y"?"✅":"-")+"</td></tr>"}).join("")+"</tbody></table></div>";
+  G("gp-result").innerHTML='<div class="tc" style="max-height:500px;overflow-y:auto"><table><thead><tr><th style="text-align:left">#</th><th style="text-align:left">제품 규격</th><th style="text-align:left">계약업체</th><th style="text-align:left">제조사</th><th>계약금액</th><th>계약방식</th><th>계약번호</th><th>계약일</th></tr></thead><tbody>'+gpItems.map(function(it,i){
+    var spec=gField(it,F_NAME,"-"),ven=gField(it,F_VENDOR,"-"),maker=gField(it,F_MAKER,"-");
+    var prc=gNumField(it,F_PRICE),typ=gField(it,F_TYPE,"-"),cno=gField(it,F_CTRNO,"-");
+    var dt=gField(it,F_DATE,"-");
+    return"<tr><td style='text-align:left;font-family:JetBrains Mono,monospace;font-size:12px'>"+(i+1)+"</td><td style='text-align:left;font-family:Noto Sans KR,sans-serif;max-width:320px;white-space:normal;line-height:1.4'>"+spec+"</td><td style='text-align:left;font-weight:600;color:var(--acb)'>"+ven+"</td><td style='text-align:left'>"+maker+"</td><td style='color:#f59e0b;font-weight:600'>"+(prc>0?gFmt(prc)+"원":"-")+"</td><td style='text-align:left'>"+typ+"</td><td>"+cno+"</td><td>"+dt.slice(0,10)+"</td></tr>"}).join("")+"</tbody></table></div>";
 }
 
 // ===== G2B: Delivery =====
@@ -852,7 +859,7 @@ async function gdSearch(){
   gLoading("gd-result");G("gd-stats").style.display="none";G("gd-charts").style.display="none";
   var items;
   try{
-    var d=await gApi("delivery","getDeliveryInfoList",{numOfRows:200,pageNo:1,prdctNm:kw,sttDt:(G("gd-from").value||"").replace(/-/g,""),endDt:(G("gd-to").value||"").replace(/-/g,""),type:"json"});
+    var d=await gApi("shopping-items","getDlvrReqInfoList",{numOfRows:200,pageNo:1,prdctClsfcNoNm:kw,inqryBgnDt:(G("gd-from").value||"").replace(/-/g,""),inqryEndDt:(G("gd-to").value||"").replace(/-/g,""),inqryDiv:1,type:"json"});
     items=gExtract(d);
   }catch(e){console.error("[G2B dlv]",e);items=[]}
   if(!items.length){items=gDemoDeliveries(kw);console.log("[G2B] 납품 API 데이터 없음 → 샘플 사용")}
@@ -893,7 +900,7 @@ async function gmSearch(){
   gLoading("gm-result");G("gm-stats").style.display="none";G("gm-charts").style.display="none";
   var items;
   try{
-    var d=await gApi("delivery","getDeliveryInfoList",{numOfRows:200,pageNo:1,prdctNm:kw,sttDt:(G("gm-from").value||"").replace(/-/g,""),endDt:(G("gm-to").value||"").replace(/-/g,""),type:"json"});
+    var d=await gApi("shopping-items","getDlvrReqInfoList",{numOfRows:200,pageNo:1,prdctClsfcNoNm:kw,inqryBgnDt:(G("gm-from").value||"").replace(/-/g,""),inqryEndDt:(G("gm-to").value||"").replace(/-/g,""),inqryDiv:1,type:"json"});
     items=gExtract(d);
   }catch(e){console.error("[G2B dmd]",e);items=[]}
   if(!items.length){items=gDemoDeliveries(kw);console.log("[G2B] 수요기관 API 데이터 없음 → 샘플 사용")}
@@ -933,7 +940,7 @@ async function gcSearch(){
   gLoading("gc-result");
   var items;
   try{
-    var d=await gApi("shopping-items","getProductInfoList",{numOfRows:100,pageNo:1,prdctNm:kw,type:"json"});
+    var d=await gApi("shopping-items","getMASCntrctPrdctInfoList",{numOfRows:100,pageNo:1,prdctClsfcNoNm:kw,inqryDiv:1,type:"json"});
     items=gExtract(d);
   }catch(e){items=[]}
   if(!items.length){items=gDemoProducts(kw);console.log("[G2B] 비교 API 데이터 없음 → 샘플 사용")}
